@@ -1,0 +1,25 @@
+{{define "content"}}
+  <div class="card">
+    <h3 class="ttl-contact">Contact Page</h3>
+    <br />
+    <div class="div-contact">
+      <p>
+        <b><i>{{.Name}}</i></b>    
+      </p>
+      <address>
+        <a href="mailto:{{.Email}}">{{.Email}}</a>
+        <br />
+        <a href="{{.Githubpers}}">{{.Githubpers}}</a>
+        <br />
+        <a href="{{.Githubproj}}">{{.Githubproj}}</a>
+      </address>
+      <br />
+      <p>By me a coffe ;-)</p>
+    </div>
+  </div>
+
+  <script>
+    console.log('[info]: Contact page');
+  </script>
+{{end}}
+

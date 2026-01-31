@@ -1,0 +1,148 @@
+{{define "content"}}
+  <div class="card">
+    {{$parentContext := .}}
+    {{range .Data.Commands}}
+      {{if eq .Command $.CommandName}}
+        <header>{{.Command}} <span id="hostName"></span> </header>
+        <br>
+        <form id="{{$.CommandName}}-form" class="card-form">
+          <fieldset>          
+            {{range .Fields}}
+              {{if eq . "RELEASE"}}
+                <input type="text" placeholder="{{.}}" name="{{.}}" id="{{.}}" class="input-text"
+                aria-describedby="invalid-{{.}}" />
+                <small id="invalid-{{.}}"></small>                
+              {{end}}
+            {{end}}
+          </fieldset>
+          <fieldset>
+            <div class="create-form-options">
+              {{range .Fields}}
+                {{if ne . "RELEASE"}}                
+                  <fieldset>
+                    <label for="action">
+                      <input type="radio" id="{{.}}" name="action" value="{{.}}" onchange="handleRadioBtn(this)" />
+                      {{.}}
+                    </label>
+                  </fieldset>                
+                {{end}}
+              {{end}}
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>Options</legend>
+            {{range .Options}}
+              <input type="checkbox" name="options_{{.Lflag}}" value="{{.Sflag}}" role="switch" />{{.Lflag}}&nbsp;
+            {{end}}
+          </fieldset>
+          <div class="grid">
+            <button id="submitBtn" class="secondary btn-card-submit" onclick="listSubmit(event)">Submit</button>
+            <button class="primary btn-card-help" onclick="helpED(event)">Help</button>
+            <button class="outline contrast" onclick="backToHome(event)">Home</button>
+          </div>
+        </form>
+        <br>
+        <div class="card-footer">
+          <div class="card-help" id="card-help">
+            <h3>Help</h3>
+            <small class="secondary">{{.Description}}</small>
+            <br><br>
+            <p>{{.Help}}</p>
+            <div class="card-help-options">
+              {{range .Options}}
+                <p>&nbsp;&nbsp;{{.Sflag}}&nbsp;|&nbsp;{{.Lflag}}&nbsp;-&nbsp;{{.Text}}</p>
+              {{end}}
+            </div>
+          </div>
+          <br>
+          <div class="card-results">
+            <p id="result" class="card-result"></p>
+            <p id="error" class="card-error"></p>
+          </div>
+        </div>
+      {{end}}
+    {{end}}
+  </div>
+
+  <script>
+    let hlp = document.getElementById("card-help");
+    hlp.style.display = 'none';
+
+    let hostName = document.getElementById('hostName');
+    hostName.innerHTML = `[${sessionStorage.getItem('hostname')}]`;
+
+    function helpED(event) {
+      event.preventDefault();     
+      hlp.style.display === 'none' ?  hlp.style.display = 'block' : hlp.style.display = 'none';
+    }
+    
+    function handleRadioBtn(radio) {
+      let r = document.getElementById("RELEASE");
+      r.style.border = '1px solid #8f8f9d';
+      r.disabled = false;
+      
+      if (radio.value !== '') { 
+        r.style.border = '1px solid #ccc';
+        r.disabled = true; 
+        return;
+      }
+    }
+
+    function backToHome(event) {
+      event.preventDefault();
+
+      const ipaddr = sessionStorage.getItem('ipaddr');
+      const port = sessionStorage.getItem('port');
+      window.location.href = `http://${ipaddr}:${port}/`;
+    }
+
+    async function listSubmit(event) {
+      event.preventDefault();
+
+      const name = '{{$.CommandName}}';
+      const result = document.getElementById('result');
+      const error = document.getElementById('error');
+      result.innerText = "";
+      error.innerText = ""; 
+
+      const form = document.getElementById(name + '-form');
+      const formData = new FormData(form);      
+      let options = [];
+      let actions = [];
+      let formObj = {};
+      formData.forEach((value, key) => {
+        if (key.indexOf('options_') != -1) {
+          options.push(value);
+          return;
+        }
+
+        value = value.trim();
+
+        formObj[key] = value;
+      });
+
+      if (error.innerText != "") { return; }
+      
+      formObj['options'] = options.join(' ').trimEnd();
+      const formJson = JSON.stringify(formObj);
+
+      result.innerText = 'send -> bastille ' + name;
+
+      let submitBtn = document.getElementById('submitBtn');
+      submitBtn.classList.add('loading');
+      submitBtn.innerHTML = '<span class="spinner"></span>';
+
+      const response = await sendHttpRequest(name, formJson);
+      if (response.code == 200) {
+        error.innerText = "";
+        result.innerText = response.data.msg;
+      } else {
+        result.innerText = "";
+        error.innerText = response.error;
+      }
+
+      submitBtn.classList.remove('loading');
+      submitBtn.innerHTML = 'Submit';
+    }
+  </script>
+{{end}}

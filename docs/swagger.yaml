@@ -1,0 +1,1580 @@
+basePath: /
+definitions:
+  main.bootstrapModel:
+    properties:
+      options:
+        example: -x
+        format: string
+        type: string
+      release|template:
+        example: 14.3-RELEASE
+        format: string
+        type: string
+      update|arch:
+        example: --i386
+        format: string
+        type: string
+    type: object
+  main.cloneModel:
+    properties:
+      ip:
+        example: n.n.n.n
+        format: string
+        type: string
+      new_name:
+        example: new_jail_name
+        format: string
+        type: string
+      options:
+        example: -a|-l|-x
+        format: string
+        type: string
+      target:
+        example: jail_target
+        format: string
+        type: string
+    type: object
+  main.cmdModel:
+    properties:
+      command:
+        example: ls -l
+        format: string
+        type: string
+      options:
+        example: -a|-x
+        format: string
+        type: string
+      target:
+        example: jail_target
+        format: string
+        type: string
+    type: object
+  main.configModel:
+    properties:
+      action:
+        example: get|set
+        format: string
+        type: string
+      options:
+        example: -x
+        format: string
+        type: string
+      property:
+        example: ip4.addr
+        format: string
+        type: string
+      target:
+        example: jail_target
+        format: string
+        type: string
+      value:
+        example: depends on property
+        format: string
+        type: string
+    type: object
+  main.consoleModel:
+    properties:
+      options:
+        example: -a|-x
+        format: string
+        type: string
+      target:
+        example: jail_target
+        format: string
+        type: string
+      user:
+        example: root
+        format: string
+        type: string
+    type: object
+  main.convertModel:
+    properties:
+      options:
+        example: -a|-y|-x
+        format: string
+        type: string
+      release:
+        example: myrelease
+        format: string
+        type: string
+      target:
+        example: jail_target
+        format: string
+        type: string
+    type: object
+  main.cpModel:
+    properties:
+      hostpath:
+        example: /host/path
+        format: string
+        type: string
+      jailpath:
+        example: /jail/path
+        format: string
+        type: string
+      options:
+        example: -q|-x
+        format: string
+        type: string
+      target:
+        example: jail_target
+        format: string
+        type: string
+    type: object
+  main.createModel:
+    properties:
+      gtwip:
+        example: n.n.n.n
+        format: string
+        type: string
+      iface:
+        example: bastille0
+        format: string
+        type: string
+      ip:
+        example: n.n.n.n
+        format: string
+        type: string
+      ipip:
+        example: n.n.n.n,i.i.i.i
+        format: string
+        type: string
+      name:
+        example: jail_name
+        format: string
+        type: string
+      options:
+        example: -B|-C|-D|-E|-g|-L|-M|-n|--no-validate|--no-boot|-p|-T|-V|-v|-x|-Z
+        format: string
+        type: string
+      release:
+        example: 14.3-RELEASE
+        format: string
+        type: string
+      value:
+        example: "99"
+        format: string
+        type: string
+      vlanid:
+        example: vlan10
+        format: string
+        type: string
+      zfsoptions:
+        example: ""
+        format: string
+        type: string
+    type: object
+  main.destroyModel:
+    properties:
+      jail|release:
+        example: jail_target or release
+        format: string
+        type: string
+      options:
+        example: -a|-c|-f|-y|-x
+        format: string
+        type: string
+    type: object
+  main.editModel:
+    properties:
+      file:
+        example: file_name
+        format: string
+        type: string
+      options:
+        example: -x
+        format: string
+        type: string
+      target:
+        example: jail_target
+        format: string
+        type: string
+    type: object
+  main.etcupdateModel:
+    properties:
+      action:
+        example: diff|resolve|update
+        format: string
+        type: string
+      bootstrap|target:
+        example: jail_name|bootstrap
+        format: string
+        type: string
+      options:
+        example: -d|-f|-x
+        format: string
+        type: string
+      release:
+        example: 14.3-RELEASE
+        format: string
+        type: string
+    type: object
+  main.exportModel:
+    properties:
+      options:
+        example: -a|--gz|-r|-s|--tgz|--txz|-v|--xz|-x
+        format: string
+        type: string
+      path:
+        example: /host/path
+        format: string
+        type: string
+      target:
+        example: jail_target
+        format: string
+        type: string
+    type: object
+  main.htopModel:
+    properties:
+      options:
+        example: -a|-x
+        format: string
+        type: string
+      target:
+        example: jail_target
+        format: string
+        type: string
+    type: object
+  main.importModel:
+    properties:
+      file:
+        example: /path/to/archive.file
+        format: string
+        type: string
+      options:
+        example: -f|-M|-v|-x
+        format: string
+        type: string
+      release:
+        example: release_name
+        format: string
+        type: string
+    type: object
+  main.jcpModel:
+    properties:
+      dest_jail:
+        example: dest_jail
+        format: string
+        type: string
+      jail_path:
+        example: /source_jail/path
+        format: string
+        type: string
+      jail_path2:
+        example: /dest_jail/path
+        format: string
+        type: string
+      options:
+        example: -q|-x
+        format: string
+        type: string
+      source_jail:
+        example: source_jail
+        format: string
+        type: string
+    type: object
+  main.limitsModel:
+    properties:
+      action:
+        example: add|remove|clear|reset|list|show|active|stats
+        format: string
+        type: string
+      option:
+        example: see rctl
+        format: string
+        type: string
+      options:
+        example: -a|-l|-x
+        format: string
+        type: string
+      target:
+        example: jail_target
+        format: string
+        type: string
+      value:
+        example: depends on Option
+        format: string
+        type: string
+    type: object
+  main.listModel:
+    properties:
+      action:
+        example: all|backup|export|import|ip|jail|limit|log|path|port|prio|release|state|template|type
+        format: string
+        type: string
+      options:
+        example: -d|-j|-p|-u|-x
+        format: string
+        type: string
+    type: object
+  main.migrateModel:
+    properties:
+      options:
+        example: -a|-b|-d|--doas|-l|-p|-x
+        format: string
+        type: string
+      remote:
+        example: user@host:port
+        format: string
+        type: string
+      target:
+        example: jail_target
+        format: string
+        type: string
+    type: object
+  main.mountModel:
+    properties:
+      dump:
+        example: "0"
+        format: string
+        type: string
+      filesystem_type:
+        example: tmpfs|nullfs
+        format: string
+        type: string
+      host_path:
+        example: /host/path
+        format: string
+        type: string
+      jail_path:
+        example: /jail/path
+        format: string
+        type: string
+      option:
+        example: ro|rw|rw,nosuid,mode=01777
+        format: string
+        type: string
+      options:
+        example: -a|-x
+        format: string
+        type: string
+      pass_number:
+        example: "0"
+        format: string
+        type: string
+      target:
+        example: jail_target
+        format: string
+        type: string
+    type: object
+  main.networkModel:
+    properties:
+      action:
+        example: add|remove
+        format: string
+        type: string
+      interface:
+        example: bastille0
+        format: string
+        type: string
+      ip:
+        example: n.n.n.n
+        format: string
+        type: string
+      options:
+        example: -a|-B|-M|-n|-P|-V|-v|-x
+        format: string
+        type: string
+      target:
+        example: jail_target
+        format: string
+        type: string
+      vlanid:
+        example: vlan10
+        format: string
+        type: string
+    type: object
+  main.pkgModel:
+    properties:
+      args:
+        example: install pkg_name
+        format: string
+        type: string
+      options:
+        example: -a|-H|-y|-x
+        format: string
+        type: string
+      target:
+        example: jail_target
+        format: string
+        type: string
+    type: object
+  main.rcpModel:
+    properties:
+      host_path:
+        example: /host/path
+        format: string
+        type: string
+      jail_path:
+        example: /jail/path
+        format: string
+        type: string
+      options:
+        example: -q|-x
+        format: string
+        type: string
+      target:
+        example: jail_target
+        format: string
+        type: string
+    type: object
+  main.rdrModel:
+    properties:
+      action:
+        example: clear|reset|list|tcp|udp
+        format: string
+        type: string
+      host_port:
+        example: "3000"
+        format: string
+        type: string
+      jail_port:
+        example: "3000"
+        format: string
+        type: string
+      log:
+        example: log
+        format: string
+        type: string
+      logopts:
+        example: log options
+        format: string
+        type: string
+      odestination:
+        example: depends on options destination
+        format: string
+        type: string
+      ointerface:
+        example: depends on options interface
+        format: string
+        type: string
+      options:
+        example: -d|-i|-s|-t|-x
+        format: string
+        type: string
+      osource:
+        example: depends on options source
+        format: string
+        type: string
+      otype:
+        example: depends on options type
+        format: string
+        type: string
+      target:
+        example: jail_target
+        format: string
+        type: string
+    type: object
+  main.renameModel:
+    properties:
+      new_name:
+        example: new_name
+        format: string
+        type: string
+      options:
+        example: -a|-x
+        format: string
+        type: string
+      target:
+        example: jail_target
+        format: string
+        type: string
+    type: object
+  main.restartModel:
+    properties:
+      options:
+        example: -b|-d|-v|-x
+        format: string
+        type: string
+      target:
+        example: jail_target
+        format: string
+        type: string
+      value:
+        example: seconds to -d option
+        format: string
+        type: string
+    type: object
+  main.serviceModel:
+    properties:
+      args:
+        example: start|restart|stop|enable|disable
+        format: string
+        type: string
+      options:
+        example: -a|-x
+        format: string
+        type: string
+      service_name:
+        example: nginx
+        format: string
+        type: string
+      target:
+        example: jail_target
+        format: string
+        type: string
+    type: object
+  main.setupModel:
+    properties:
+      action:
+        example: bridge|loopback|pf|firewall|shared|vnet|storage
+        format: string
+        type: string
+      options:
+        example: -y|-x
+        format: string
+        type: string
+    type: object
+  main.startModel:
+    properties:
+      options:
+        example: -b|-d|-v|-x
+        format: string
+        type: string
+      target:
+        example: jail_target
+        format: string
+        type: string
+      value:
+        example: seconds to -d option
+        format: string
+        type: string
+    type: object
+  main.stopModel:
+    properties:
+      options:
+        example: -v|-x
+        format: string
+        type: string
+      target:
+        example: jail_target
+        format: string
+        type: string
+    type: object
+  main.sysrcModel:
+    properties:
+      args:
+        example: sshd_enable="YES"
+        format: string
+        type: string
+      options:
+        example: -a|-x
+        format: string
+        type: string
+      target:
+        example: jail_target
+        format: string
+        type: string
+    type: object
+  main.tagsModel:
+    properties:
+      action:
+        example: add|delete|list
+        format: string
+        type: string
+      options:
+        example: -x
+        format: string
+        type: string
+      tags:
+        example: tag_name1,tag_name2
+        format: string
+        type: string
+      target:
+        example: jail_target
+        format: string
+        type: string
+    type: object
+  main.templateModel:
+    properties:
+      action:
+        example: --convert
+        format: string
+        type: string
+      options:
+        example: -a|-x
+        format: string
+        type: string
+      target:
+        example: jail_target
+        format: string
+        type: string
+      template:
+        example: template/name
+        format: string
+        type: string
+    type: object
+  main.topModel:
+    properties:
+      options:
+        example: -a|-x
+        format: string
+        type: string
+      target:
+        example: jail_target
+        format: string
+        type: string
+    type: object
+  main.umountModel:
+    properties:
+      jail_path:
+        example: /jail/path
+        format: string
+        type: string
+      options:
+        example: -a|-x
+        format: string
+        type: string
+      target:
+        example: jail_target
+        format: string
+        type: string
+    type: object
+  main.updateModel:
+    properties:
+      options:
+        example: -a|-f|-x
+        format: string
+        type: string
+      target:
+        example: jail_target
+        format: string
+        type: string
+    type: object
+  main.upgradeModel:
+    properties:
+      NEW_RELEASE|install:
+        example: n.n-RELEASE|install
+        format: string
+        type: string
+      options:
+        example: -a|-f|-x
+        format: string
+        type: string
+      target:
+        example: jail_target
+        format: string
+        type: string
+    type: object
+  main.verifyModel:
+    properties:
+      RELEASE|TEMPLATE:
+        example: n.n-RELEASE|template_name
+        format: string
+        type: string
+      options:
+        example: -x
+        format: string
+        type: string
+    type: object
+  main.zfsModel:
+    properties:
+      /jail/path:
+        example: /jail/path
+        format: string
+        type: string
+      action:
+        example: destroy|rollback|snapshot|df|usage|get|set|jail|unjail
+        format: string
+        type: string
+      key:
+        example: name for set action
+        format: string
+        type: string
+      options:
+        example: -a|-v|-x
+        format: string
+        type: string
+      pool/dataset:
+        example: pool/dataset
+        format: string
+        type: string
+      tag:
+        example: tag_name
+        format: string
+        type: string
+      target:
+        example: jail_target
+        format: string
+        type: string
+      value:
+        example: value for set action
+        format: string
+        type: string
+    type: object
+info:
+  contact: {}
+  description: |-
+    API interface to FreeBSD bastille
+    Observation: Do not use console, htop and top commands with API. Only for UI Interface.
+  license:
+    name: BSD-3-Clause
+    url: https://opensource.org/license/bsd-3-clause
+  termsOfService: http://swagger.io/terms/
+  title: Bastille-Web
+  version: "1.0"
+paths:
+  /bootstrap:
+    post:
+      consumes:
+      - application/json
+      description: The bootstrap sub-command is used to download and extract releases
+        and templates for use with Bastille containers. A valid release is needed
+        before containers can be created. Templates are optional but are managed in
+        the same manner.
+      parameters:
+      - description: bootstrap
+        in: body
+        name: bootstrap
+        required: true
+        schema:
+          $ref: '#/definitions/main.bootstrapModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: bootstrap command
+      tags:
+      - bootstrap
+  /clone:
+    post:
+      consumes:
+      - application/json
+      description: Clone/duplicate an existing jail to a new jail.
+      parameters:
+      - description: clone
+        in: body
+        name: clone
+        required: true
+        schema:
+          $ref: '#/definitions/main.cloneModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: clone command
+      tags:
+      - clone
+  /cmd:
+    post:
+      consumes:
+      - application/json
+      description: Execute commands inside targeted jail(s).
+      parameters:
+      - description: cmd
+        in: body
+        name: cmd
+        required: true
+        schema:
+          $ref: '#/definitions/main.cmdModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: cmd command
+      tags:
+      - cmd
+  /config:
+    post:
+      consumes:
+      - application/json
+      description: Get, set or remove properties from targeted jail(s).
+      parameters:
+      - description: config
+        in: body
+        name: config
+        required: true
+        schema:
+          $ref: '#/definitions/main.configModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: config command
+      tags:
+      - config
+  /console:
+    post:
+      consumes:
+      - application/json
+      description: Launch a login shell into the jail. Default is password- less root
+        login.
+      parameters:
+      - description: config
+        in: body
+        name: console
+        required: true
+        schema:
+          $ref: '#/definitions/main.consoleModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: console command
+      tags:
+      - console
+  /convert:
+    post:
+      consumes:
+      - application/json
+      description: Convert a thin jail to a thick jail. Convert a thick jail to a
+        custom release.
+      parameters:
+      - description: config
+        in: body
+        name: convert
+        required: true
+        schema:
+          $ref: '#/definitions/main.convertModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: convert command
+      tags:
+      - convert
+  /cp:
+    post:
+      consumes:
+      - application/json
+      description: Copy files from host to jail(s).
+      parameters:
+      - description: cp
+        in: body
+        name: cp
+        required: true
+        schema:
+          $ref: '#/definitions/main.cpModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: cp command
+      tags:
+      - cp
+  /create:
+    post:
+      consumes:
+      - application/json
+      description: Create a jail uning any available bootstrapped release. To create
+        a jail, simply provide a name, bootstrapped release, and IP address.
+      parameters:
+      - description: create
+        in: body
+        name: create
+        required: true
+        schema:
+          $ref: '#/definitions/main.createModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: create command
+      tags:
+      - create
+  /destroy:
+    post:
+      consumes:
+      - application/json
+      description: Destroy jails or releases.
+      parameters:
+      - description: destroy
+        in: body
+        name: destroy
+        required: true
+        schema:
+          $ref: '#/definitions/main.destroyModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: destroy command
+      tags:
+      - destroy
+  /edit:
+    post:
+      consumes:
+      - application/json
+      description: Edit jail config files.
+      parameters:
+      - description: edit
+        in: body
+        name: edit
+        required: true
+        schema:
+          $ref: '#/definitions/main.editModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: edit command
+      tags:
+      - edit
+  /etcupdate:
+    post:
+      consumes:
+      - application/json
+      description: This command will update the contents of /etc inside a jail. It
+        should be run after a jail upgrade.
+      parameters:
+      - description: etcupdate
+        in: body
+        name: etcupdate
+        required: true
+        schema:
+          $ref: '#/definitions/main.etcupdateModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: etcupdate command
+      tags:
+      - etcupdate
+  /export:
+    post:
+      consumes:
+      - application/json
+      description: Exporting a container creates an archive or image that can be sent
+        to a different machine to be imported later. These exported archives can be
+        used as container backups.
+      parameters:
+      - description: export
+        in: body
+        name: export
+        required: true
+        schema:
+          $ref: '#/definitions/main.exportModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: export command
+      tags:
+      - export
+  /htop:
+    post:
+      consumes:
+      - application/json
+      description: This command runs htop in the targeted jail. Requires htop to be
+        installed in the jail.
+      parameters:
+      - description: htop
+        in: body
+        name: htop
+        required: true
+        schema:
+          $ref: '#/definitions/main.htopModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: htop command
+      tags:
+      - htop
+  /import:
+    post:
+      consumes:
+      - application/json
+      description: Import a jail backup image or archive.
+      parameters:
+      - description: import
+        in: body
+        name: import
+        required: true
+        schema:
+          $ref: '#/definitions/main.importModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: import command
+      tags:
+      - import
+  /jcp:
+    post:
+      consumes:
+      - application/json
+      description: Copy files from jail to jail(s).
+      parameters:
+      - description: jcp
+        in: body
+        name: jcp
+        required: true
+        schema:
+          $ref: '#/definitions/main.jcpModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: jcp command
+      tags:
+      - jcp
+  /limits:
+    post:
+      consumes:
+      - application/json
+      description: Set resourse limits for targeted jail(s).
+      parameters:
+      - description: limits
+        in: body
+        name: limits
+        required: true
+        schema:
+          $ref: '#/definitions/main.limitsModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: limits command
+      tags:
+      - limits
+  /list:
+    post:
+      consumes:
+      - application/json
+      description: List jails, ports, releases, templates, logs, limits, exports and
+        imports and much more managed by bastille.
+      parameters:
+      - description: list
+        in: body
+        name: list
+        required: true
+        schema:
+          $ref: '#/definitions/main.listModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: list command
+      tags:
+      - list
+  /migrate:
+    post:
+      consumes:
+      - application/json
+      description: The migrate sub-command allows migrating the targeted jail(s) to
+        another remote system.
+      parameters:
+      - description: migrate
+        in: body
+        name: migrate
+        required: true
+        schema:
+          $ref: '#/definitions/main.migrateModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: migrate command
+      tags:
+      - migrate
+  /mount:
+    post:
+      consumes:
+      - application/json
+      description: To mount storage within the container use bastille mount.
+      parameters:
+      - description: mount
+        in: body
+        name: mount
+        required: true
+        schema:
+          $ref: '#/definitions/main.mountModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: mount command
+      tags:
+      - mount
+  /network:
+    post:
+      consumes:
+      - application/json
+      description: Add or remove interfaces to existing jails.
+      parameters:
+      - description: network
+        in: body
+        name: network
+        required: true
+        schema:
+          $ref: '#/definitions/main.networkModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: network command
+      tags:
+      - network
+  /pkg:
+    post:
+      consumes:
+      - application/json
+      description: Manage binary packages inside jails.
+      parameters:
+      - description: pkg
+        in: body
+        name: pkg
+        required: true
+        schema:
+          $ref: '#/definitions/main.pkgModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: pkg command
+      tags:
+      - pkg
+  /rcp:
+    post:
+      consumes:
+      - application/json
+      description: This command allows copying files from jail to host.
+      parameters:
+      - description: rcp
+        in: body
+        name: rcp
+        required: true
+        schema:
+          $ref: '#/definitions/main.rcpModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: rcp command
+      tags:
+      - rcp
+  /rdr:
+    post:
+      consumes:
+      - application/json
+      description: Bastille rdr allows you to configure dynamic rdr rules for your
+        containers without modifying pf.conf.
+      parameters:
+      - description: rdr
+        in: body
+        name: rdr
+        required: true
+        schema:
+          $ref: '#/definitions/main.rdrModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: rdr command
+      tags:
+      - rdr
+  /rename:
+    post:
+      consumes:
+      - application/json
+      description: Rename a jail.
+      parameters:
+      - description: rename
+        in: body
+        name: rename
+        required: true
+        schema:
+          $ref: '#/definitions/main.renameModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: rename command
+      tags:
+      - rename
+  /restart:
+    post:
+      consumes:
+      - application/json
+      description: Restart jail(s).
+      parameters:
+      - description: restart
+        in: body
+        name: restart
+        required: true
+        schema:
+          $ref: '#/definitions/main.restartModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: restart command
+      tags:
+      - restart
+  /service:
+    post:
+      consumes:
+      - application/json
+      description: The service sub-command allows for managing services within jails.
+        This allows you to start, stop, restart, and otherwise interact with services
+        running inside the jail(s).
+      parameters:
+      - description: service
+        in: body
+        name: service
+        required: true
+        schema:
+          $ref: '#/definitions/main.serviceModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: service command
+      tags:
+      - service
+  /setup:
+    post:
+      consumes:
+      - application/json
+      description: The setup sub-command attempts to automatically configure a host
+        system for Bastille jails. This allows you to configure networking, firewall,
+        storage, vnet and bridge options for a Bastille host with one command.
+      parameters:
+      - description: setup
+        in: body
+        name: setup
+        required: true
+        schema:
+          $ref: '#/definitions/main.setupModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: setup command
+      tags:
+      - setup
+  /start:
+    post:
+      consumes:
+      - application/json
+      description: Start jail(s).
+      parameters:
+      - description: start
+        in: body
+        name: start
+        required: true
+        schema:
+          $ref: '#/definitions/main.startModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: start command
+      tags:
+      - start
+  /stop:
+    post:
+      consumes:
+      - application/json
+      description: Stop jail(s).
+      parameters:
+      - description: stop
+        in: body
+        name: stop
+        required: true
+        schema:
+          $ref: '#/definitions/main.stopModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: stop command
+      tags:
+      - stop
+  /sysrc:
+    post:
+      consumes:
+      - application/json
+      description: The sysrc sub-command allows for safely editing system configuration
+        files. In jail terms, this allows us to toggle on/off services and options
+        at startup.
+      parameters:
+      - description: sysrc
+        in: body
+        name: sysrc
+        required: true
+        schema:
+          $ref: '#/definitions/main.sysrcModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: sysrc command
+      tags:
+      - sysrc
+  /tags:
+    post:
+      consumes:
+      - application/json
+      description: The tags sub-command adds, removes or lists arbitrary tags on your
+        jail(s).
+      parameters:
+      - description: tags
+        in: body
+        name: tags
+        required: true
+        schema:
+          $ref: '#/definitions/main.tagsModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: tags command
+      tags:
+      - tags
+  /template:
+    post:
+      consumes:
+      - application/json
+      description: Apply file templates to targeted container(s).
+      parameters:
+      - description: template
+        in: body
+        name: template
+        required: true
+        schema:
+          $ref: '#/definitions/main.templateModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: template command
+      tags:
+      - template
+  /top:
+    post:
+      consumes:
+      - application/json
+      description: This command runs top in the targeted jail.
+      parameters:
+      - description: top
+        in: body
+        name: top
+        required: true
+        schema:
+          $ref: '#/definitions/main.topModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: top command
+      tags:
+      - top
+  /umount:
+    post:
+      consumes:
+      - application/json
+      description: Unmount storage from jail(s).
+      parameters:
+      - description: umount
+        in: body
+        name: umount
+        required: true
+        schema:
+          $ref: '#/definitions/main.umountModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: umount command
+      tags:
+      - umount
+  /update:
+    post:
+      consumes:
+      - application/json
+      description: The update command targets a release or a thick jail. Because thin
+        jails are based on a release, when the release is updated all the thin jails
+        are automatically updated as well.
+      parameters:
+      - description: update
+        in: body
+        name: update
+        required: true
+        schema:
+          $ref: '#/definitions/main.updateModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: update command
+      tags:
+      - update
+  /upgrade:
+    post:
+      consumes:
+      - application/json
+      description: The upgrade command targets a thick or thin jail. Thin jails will
+        be updated by changing the release mount point that it is based on. Thick
+        jails will be upgraded normally.
+      parameters:
+      - description: upgrade
+        in: body
+        name: upgrade
+        required: true
+        schema:
+          $ref: '#/definitions/main.upgradeModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: upgrade command
+      tags:
+      - upgrade
+  /verify:
+    post:
+      consumes:
+      - application/json
+      description: This command scans a bootstrapped release or template and validates
+        that everything looks in order. This is not a 100% comprehensive check, but
+        it compares the release or template against a “known good” index.
+      parameters:
+      - description: verify
+        in: body
+        name: verify
+        required: true
+        schema:
+          $ref: '#/definitions/main.verifyModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: verify command
+      tags:
+      - verify
+  /zfs:
+    post:
+      consumes:
+      - application/json
+      description: Manage ZFS properties, create, destroy and rollback snapshots,
+        jail and unjail datasets (ZFS only), and check ZFS usage for targeted jail(s).
+      parameters:
+      - description: zfs
+        in: body
+        name: zfs
+        required: true
+        schema:
+          $ref: '#/definitions/main.zfsModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: zfs command
+      tags:
+      - zfs
+swagger: "2.0"

@@ -453,6 +453,18 @@
       "helpUrl": "https://bastille.readthedocs.io/en/latest/chapters/subcommands/migrate.html"
     },
     {
+      "command": "monitor",
+      "description": "Monitor adds, removes, lists and enables/disables monitoring for container services.",
+      "options": [{
+        "sflag": "-x",
+        "lflag": "--debug",
+        "text": "Enable debug mode."
+      }],
+      "fields": ["TARGET", "enable", "disable", "status", "add", "delete", "list", "SERVICE"],
+      "help": "bastille monitor [option(s)] enable|disable|status TARGET add|delete|list service1,service2 TARGET list [service] TARGET",
+      "helpUrl": "https://bastille.readthedocs.io/en/latest/chapters/subcommands/monitor.html"
+    },
+    {
       "command": "mount",
       "description": "To mount storage within the container use bastille mount.",
       "options": [{

@@ -574,6 +574,35 @@ func (hd *HandlersData) migrate(w http.ResponseWriter, r *http.Request) {
 	respondOkWithJSONUtil(w, result)
 }
 
+// monitor
+// @Summary monitor command
+// @Description To mount storage within the container use bastille mount.
+// @Tags monitor
+// @Accept  json
+// @Produce  text/plain
+// @Param  monitor body	monitorModel  true  "monitor"
+// @Success 200 {object} string
+// @Router /monitor [post]
+func (hd *HandlersData) monitor(w http.ResponseWriter, r *http.Request) {
+	log.Println("monitorHandler")
+
+	var data monitorModel
+	err := json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	result, err := hd.bl.monitor(data.Options, data.Target, data.Action, data.Service)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	respondOkWithJSONUtil(w, result)
+}
+
 // mount
 // @Summary mount command
 // @Description To mount storage within the container use bastille mount.

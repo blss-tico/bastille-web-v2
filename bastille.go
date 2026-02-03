@@ -468,6 +468,28 @@ func (b *Bastille) migrate(options, target, remote string) (string, error) {
 	return runBastilleCommands(args...)
 }
 
+func (b *Bastille) monitor(options, target, action, service string) (string, error) {
+	args := []string{"monitor"}
+
+	if options != "" {
+		args = append(args, options)
+	}
+
+	if target != "" {
+		args = append(args, target)
+	}
+
+	if action != "" {
+		args = append(args, action)
+	}
+
+	if service != "" {
+		args = append(args, service)
+	}
+
+	return runBastilleCommands(args...)
+}
+
 func (b *Bastille) mount(options, target, hostpath, jailpath, filesystemtype, option, dump, passnumber string) (string, error) {
 	args := []string{"mount"}
 

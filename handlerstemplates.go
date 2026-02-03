@@ -289,6 +289,12 @@ func (ht *HandlersTemplates) migrate(w http.ResponseWriter, r *http.Request) {
 	renderTemplateUtil(w, "migrate.html", data)
 }
 
+func (ht *HandlersTemplates) monitor(w http.ResponseWriter, r *http.Request) {
+	log.Println("monitorHandlersTemplates")
+	data := templatesModel{CommandName: "monitor", Data: bastille}
+	renderTemplateUtil(w, "monitor.html", data)
+}
+
 func (ht *HandlersTemplates) mount(w http.ResponseWriter, r *http.Request) {
 	log.Println("mountHandlersTemplates")
 	data := templatesModel{CommandName: "mount", Data: bastille}

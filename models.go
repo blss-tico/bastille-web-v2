@@ -153,6 +153,13 @@ type migrateModel struct {
 	Remote  string `json:"remote" example:"user@host:port" format:"string"`
 }
 
+type monitorModel struct {
+	Options string `json:"options,omitempty" example:"-x" format:"string"`
+	Target  string `json:"target" example:"jail_target" format:"string"`
+	Action  string `json:"action" example:"enable|disable|status|add|delete|list" format:"string"`
+	Service string `json:"service" example:"nginx" format:"string"`
+}
+
 type mountModel struct {
 	Options        string `json:"options,omitempty" example:"-a|-x" format:"string"`
 	Target         string `json:"target" example:"jail_target" format:"string"`

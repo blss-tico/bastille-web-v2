@@ -9,11 +9,12 @@
           <fieldset>
             {{range .Fields}}
               {{if (or (eq . "get") (eq . "set") (eq . "add") (eq . "remove"))}}
-                <input type="radio" name="action" value="{{.}}" id="{{.}}" onchange="handleRadioBtn(this)"/>
-                <label htmlFor="{{.}}">{{.}}</label>
-                {{if (eq . "remove")}}
-                  <br><br>
-                {{end}}
+                <fieldset>
+                  <label htmlFor="{{.}}">
+                    <input type="radio" name="action" value="{{.}}" id="{{.}}" onchange="handleRadioBtn(this)"/>
+                    {{.}}
+                  </label>                
+                </fieldset>
               {{else}}
                 {{if eq . "TARGET"}}                  
                   <select name="{{.}}" id="{{.}}" aria-label="{{.}}" required></select>

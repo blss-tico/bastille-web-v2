@@ -8,24 +8,13 @@
         <form id="{{$.CommandName}}-form" class="card-form">
           <fieldset>
             {{range .Fields}}
-              {{if (or (eq . "diff") (eq . "resolve") (eq . "update"))}}
-                <fieldset>
-                  <label htmlFor="{{.}}">
-                    <input type="radio" name="action" value="{{.}}" id="{{.}}" onchange="handleRadioBtn(this)"/>
-                    {{.}}
-                  </label>                
-                </fieldset>
+              {{if eq . "TARGET"}}
+                <select name="{{.}}" id="{{.}}" aria-label="{{.}}" required></select>
+                <small id="invalid-{{.}}"></small>
               {{else}}
-                {{if eq . "bootstrap|TARGET"}}                  
-                  <select name="{{.}}" id="{{.}}" aria-label="{{.}}" required>
-                    <option>bootstrap</option>
-                  </select>
-                  <small id="invalid-{{.}}"></small>
-                {{else}}            
-                  <input type="text" placeholder="{{.}}" name="{{.}}" id="{{.}}" class="input-text"
-                  aria-describedby="invalid-{{.}}" />
-                  <small id="invalid-{{.}}"></small>
-                {{end}}
+                <input type="text" placeholder="{{.}}" name="{{.}}" id="{{.}}" class="input-text"
+                aria-describedby="invalid-{{.}}" />
+                <small id="invalid-{{.}}"></small>
               {{end}}
             {{end}}
           </fieldset>
@@ -36,7 +25,7 @@
             {{end}}
           </fieldset>
           <div class="grid">
-            <button id="submitBtn" class="secondary btn-card-submit" onclick="etcupdateSubmit(event)">Submit</button>
+            <button id="submitBtn" class="secondary btn-card-submit" onclick="upgradeSubmit(event)">Submit</button>
             <button class="primary btn-card-help" onclick="helpED(event)">Help</button>
             <button class="outline contrast" onclick="backToHome(event)">Home</button>
           </div>
@@ -65,15 +54,13 @@
   </div>
 
   <script>
-    console.log('[info]: config page');
-    
     let hlp = document.getElementById("card-help");
     hlp.style.display = 'none';
 
     let hostName = document.getElementById('hostName');
     hostName.innerHTML = `[${sessionStorage.getItem('hostname')}]`;
 
-    let tgt = document.getElementById('bootstrap|TARGET');
+    let tgt = document.getElementById('TARGET');
     let jails = sessionStorage.getItem('jails');
     let pjails = JSON.parse(jails);
     pjails.forEach(j => {
@@ -96,19 +83,7 @@
       window.location.href = `http://${ipaddr}:${port}/`;
     }
 
-    function handleRadioBtn(radio) {
-      let r = document.getElementById("RELEASE");
-      r.style.border = '1px solid #8f8f9d';
-      r.disabled = false;
-      
-      if (radio.value === 'resolve') { 
-        r.style.border = '1px solid #ccc';
-        r.disabled = true;
-        return;
-      }
-    }
-
-    async function etcupdateSubmit(event) {
+    async function upgradeSubmit(event) {
       event.preventDefault();
 
       const name = '{{$.CommandName}}';
@@ -116,9 +91,9 @@
       const error = document.getElementById('error');
       result.innerText = "";
       error.innerText = ""; 
-      
+
       const form = document.getElementById(name + '-form');
-      const formData = new FormData(form);
+      const formData = new FormData(form);      
       let options = [];
       let formObj = {};
       formData.forEach((value, key) => {
@@ -129,49 +104,47 @@
 
         value = value.trim();
 
-        if (key == "action") {
-          formObj[key] = value;
-          return;
-        }
+        if (key === "TARGET") {
+          let t = document.getElementById(key);
+          t.style.borderColor = 'initial';
 
-        let fieldError = document.getElementById(`invalid-${key}`);
-        fieldError.innerHTML = "";
-
-        if (key === "bootstrap|TARGET") {
-          let bt = document.getElementById(key);
-          bt.style.borderColor = 'initial';          
+          let tfieldError = document.getElementById(`invalid-${key}`);
+          tfieldError.innerHTML = "";
 
           if (value != "") {
-            bt.setAttribute('aria-invalid', 'false');
+            t.setAttribute('aria-invalid', 'false');
             formObj[key] = value;
             return;
           }
 
-          let errorString = "[Error]: invalid value for bootstrap|TARGET field.";          
+          let errorString = "[Error]: TARGET is a required field.";
           error.innerText = errorString;
-          bt.style.borderColor = '#e72727';
-          bt.setAttribute('aria-invalid', 'true');
-          fieldError.innerHTML = errorString;
+          t.style.borderColor = '#e72727';
+          t.setAttribute('aria-invalid', 'true');
+          tfieldError.innerHTML = errorString;
         }
 
-        if (key === "RELEASE") {
-          let r = document.getElementById(key);
-          r.style.borderColor = 'initial';
+        if (key === "NEW_RELEASE|install") {
+          let nri = document.getElementById(key);
+          nri.style.borderColor = 'initial';
+
+          let nrifieldError = document.getElementById(`invalid-${key}`);
+          nrifieldError.innerHTML = "";
 
           if (value != "") {
-            r.setAttribute('aria-invalid', 'false');
+            nri.setAttribute('aria-invalid', 'false');
             formObj[key] = value;
             return;
           }
 
-          let errorString = "[Error]: invalid value for RELEASE field.";          
+          let errorString = "[Error]: NEW_RELEASE|install is a required field.";
           error.innerText = errorString;
-          r.style.borderColor = '#e72727';
-          r.setAttribute('aria-invalid', 'true');
-          fieldError.innerHTML = errorString;
-        }
+          nri.style.borderColor = '#e72727';
+          nri.setAttribute('aria-invalid', 'true');
+          nrifieldError.innerHTML = errorString;
+        }        
       });
-      
+
       if (error.innerText != "") { return; }
 
       formObj['options'] = options.join(' ').trimEnd();

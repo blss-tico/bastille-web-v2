@@ -66,7 +66,7 @@
         <p class="home-modal-cmds-text" id="homeCmdsModalText">
           {{range .Data.Commands}}
             {{if and (ne .Command "edit")}}
-              <span class="home-modal-cmds-links">
+              <span class="home-modal-cmds-links" onclick="location.href='/{{.Command}}';">
                 <a href="/{{.Command}}">{{.Command}}</a>
               </span>
             {{end}}

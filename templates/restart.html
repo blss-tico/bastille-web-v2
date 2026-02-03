@@ -21,7 +21,8 @@
           <fieldset>
             <legend>Options</legend>
             {{range .Options}}
-              <input type="checkbox" name="options_{{.Lflag}}" value="{{.Sflag}}" role="switch" onchange="handleCheckBox(this)" />{{.Lflag}}&nbsp;
+              <input type="checkbox" name="options_{{.Lflag}}" value="{{.Sflag}}" role="switch" onchange="handleCheckBox(this)" />
+              {{.Lflag}}&nbsp;&nbsp;
             {{end}}
           </fieldset>
           <div class="grid">
@@ -81,14 +82,19 @@
     let v = document.getElementById("VALUE");
     v.disabled = true;
     v.style.border = disabled;
+    v.style.display = 'none';
 
     function handleCheckBox(check) {
+      console.log(check, check.value);
+
       v.disabled = true;
       v.style.border = disabled;
+      v.style.display = 'none';
 
       if (check.checked && (check.value === '-d' || check.value === '--delay')) { 
         v.disabled = false; 
         v.style.border = enabled;
+        v.style.display = 'block';
       }
     }
 

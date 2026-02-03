@@ -85,14 +85,19 @@
     }
     
     let tg = document.getElementById("tags");
+    tg.style.border = '1px solid #ccc';
+    tg.disabled = true;
+    tg.style.display = 'none';
 
     function handleRadioBtn(radio) {      
       tg.style.border = '1px solid #8f8f9d';
-      tg.disabled = false;
+      tg.disabled = true;
+      tg.style.display = 'none';
       
-      if (radio.value === 'list') { 
+      if (radio.value === 'add' || radio.value === 'delete') {        
         tg.style.border = '1px solid #ccc';
-        tg.disabled = true; 
+        tg.disabled = false;
+        tg.style.display = 'block';
         return;
       }
     }

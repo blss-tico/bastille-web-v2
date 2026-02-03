@@ -100,61 +100,77 @@
     let tg = document.getElementById("TAG");
     tg.style.border = disabled;
     tg.disabled = true;
+    tg.style.display = 'none';
 
     let k = document.getElementById("key");
     k.style.border = disabled;
     k.disabled = true;
+    k.style.display = 'none';
 
     let v = document.getElementById("value");
     v.style.border = disabled;
     v.disabled = true;
+    v.style.display = 'none';
 
     let pd = document.getElementById("pool/dataset");
     pd.style.border = disabled;
     pd.disabled = true;
+    pd.style.display = 'none';
     
     let jp = document.getElementById("/jail/path");
     jp.style.border = disabled;
     jp.disabled = true;
+    jp.style.display = 'none';
 
     function handleRadioBtn(radio) {
       tg.style.border = disabled;
       tg.disabled = true;
+      tg.style.display = 'none';
 
       k.style.border = disabled;
       k.disabled = true;
+      k.style.display = 'none';
 
       v.style.border = disabled;
       v.disabled = true;
+      v.style.display = 'none';
 
       pd.style.border = disabled;
       pd.disabled = true;
+      pd.style.display = 'none';
 
       jp.style.border = disabled;
       jp.disabled = true;
+      jp.style.display = 'none';
 
       if (radio.value === 'destroy' || radio.value === 'rollback' || radio.value === 'snapshot') { 
+        tg.style.display = 'block';
         tg.style.border = enabled;
         tg.disabled = false;
       }
 
       if (radio.value === 'get' || radio.value === 'set') { 
+        k.style.display = 'block';
         k.style.border = enabled;
         k.disabled = false;
 
+        v.style.display = 'block';
         v.style.border = enabled;
         v.disabled = false;
       }
 
       if (radio.value === 'jail') { 
+        pd.style.display = 'block';
         pd.style.border = enabled;
         pd.disabled = false;
 
+        jp.style.display = 'block';
         jp.style.border = enabled;
         jp.disabled = false;
       }
 
       if (radio.value === 'unjail') {        
+        pd.style.display = 'block';
         pd.style.border = enabled;
         pd.disabled = false;
       }

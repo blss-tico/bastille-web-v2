@@ -585,7 +585,7 @@
         "text": "Enable debug mode."
       }],
       "fields": ["odestination", "ointerface", "osource", "otype", "TARGET", "clear", "reset", "list", "tcp", "udp", "HOST_PORT", "JAIL_PORT", "log", "logopts"],
-      "help": "bastille rdr [option(s)] TARGET [clear|reset|list|(tcp|udp)] HOST_PORT JAIL_PORT [log ['(' logopts ')']]",
+      "help": "bastille rdr [option(s)] TARGET tcp|udp HOST_PORT JAIL_PORT [log LOG_OPTIONS] TARGET clear|reset|list",
       "helpUrl": "https://bastille.readthedocs.io/en/latest/chapters/subcommands/rdr.html"
     },
     {

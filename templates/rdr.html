@@ -8,33 +8,44 @@
         <form id="{{$.CommandName}}-form" class="card-form">
           <fieldset>
             {{range .Fields}}
-              {{if or (eq . "clear") (eq . "reset") (eq . "list") (eq . "tcp") (eq . "udp")}}
-                <fieldset>
-                  <label for="action">
-                    <input type="radio" name="action" value="{{.}}" id="{{.}}" onchange="handleRadioBtn(this)" />
-                    {{.}}
-                  </label>
-                </fieldset>
-              {{else}}
-                {{if or (eq . "odestination") (eq . "ointerface") (eq . "osource") (eq . "otype")}}                               
-                  <input type="text" name="{{.}}" id="{{.}}" placeholder="{{.}}" />
-                {{else}}
-                  {{if eq . "TARGET"}}
-                    <select name="{{.}}" id="{{.}}" aria-label="{{.}}" required></select>
-                    <small id="invalid-{{.}}"></small>
-                  {{else}}
-                    <input type="text" placeholder="{{.}}" name="{{.}}" id="{{.}}" class="input-text"
-                      aria-describedby="invalid-{{.}}" />
-                    <small id="invalid-{{.}}"></small>
-                  {{end}}
-                {{end}}
+              {{if eq . "TARGET"}}
+                <select name="{{.}}" id="{{.}}" aria-label="{{.}}" required></select>
+                <small id="invalid-{{.}}"></small>
               {{end}}
             {{end}}
+
+            <div class="create-form-options">
+              {{range .Fields}}
+                {{if or (eq . "clear") (eq . "reset") (eq . "list") (eq . "tcp") (eq . "udp")}}
+                  <fieldset>
+                    <label for="action">
+                      <input type="radio" name="action" value="{{.}}" id="{{.}}" onchange="handleRadioBtn(this)" />
+                      {{.}}
+                    </label>
+                  </fieldset>
+                {{end}}
+              {{end}}
+            </div>
+            
+            {{range .Fields}}
+              {{if or (eq . "HOST_PORT") (eq . "JAIL_PORT") (eq . "log") (eq . "logopts")}}
+                <input type="text" placeholder="{{.}}" name="{{.}}" id="{{.}}" class="input-text"
+                  aria-describedby="invalid-{{.}}" />
+                <small id="invalid-{{.}}"></small>
+              {{end}}
+            {{end}}
+
+            {{range .Fields}}
+              {{if or (eq . "odestination") (eq . "ointerface") (eq . "osource") (eq . "otype")}}
+                <input type="text" name="{{.}}" id="{{.}}" placeholder="{{.}}" />
+                <small id="invalid-{{.}}"></small>
+              {{end}}
+            {{end}}            
           </fieldset>
           <fieldset>
             <legend>Options</legend>
             {{range .Options}}
-              <input type="checkbox" name="options_{{.Lflag}}" value="{{.Sflag}}" role="switch" />{{.Lflag}}&nbsp;
+              <input type="checkbox" name="options_{{.Lflag}}" value="{{.Sflag}}" role="switch" onchange="handleCheckBox(this)"/>{{.Lflag}}&nbsp;
             {{end}}
           </fieldset>
           <div class="grid">
@@ -91,55 +102,74 @@
     const enabled = '1px solid #8f8f9d';
     const disabled = '1px solid #ccc';
 
+    let hp = document.getElementById("HOST_PORT");
+    let jp = document.getElementById("JAIL_PORT");
+    let lg = document.getElementById("log");
+    let lo = document.getElementById("logopts");
+    disableFields();
+
     let od = document.getElementById("odestination");
-    od.style.border = enabled;
+    od.style.border = disabled;
     od.disabled = true;
     od.style.display = 'none';
 
     let oi = document.getElementById("ointerface");
-    oi.style.border = enabled;
+    oi.style.border = disabled;
     oi.disabled = true;
     oi.style.display = 'none';
 
     let os = document.getElementById("osource");
-    os.style.border = enabled;
+    os.style.border = disabled;
     os.disabled = true;
     os.style.display = 'none';
 
     let ot = document.getElementById("otype");
-    ot.style.border = enabled;
+    ot.style.border = disabled;
     ot.disabled = true;
     ot.style.display = 'none';
 
-    function handleRadioBtn(radio) {
-      let hp = document.getElementById("HOST_PORT");
+    function enableFields() {
       hp.style.border = enabled;
       hp.disabled = false;
+      hp.style.display = 'block';
 
-      let jp = document.getElementById("JAIL_PORT");
       jp.style.border = enabled;
       jp.disabled = false;
+      jp.style.display = 'block';
+
+      lg.style.border = enabled;
+      lg.disabled = false;
+      lg.style.display = 'block';
       
-      if (radio.value === 'clear' || radio.value === 'list' || radio.value === 'reset') { 
-        hp.style.border = disabled;
-        hp.disabled = true;
+      lo.style.border = enabled;
+      lo.disabled = false;
+      lo.style.display = 'block';
+    }
 
-        jp.style.border = disabled;
-        jp.disabled = true;
+    function disableFields() {    
+      hp.style.border = disabled;
+      hp.disabled = true;
+      hp.style.display = 'none';
 
-        od.style.border = disabled;
-        od.disabled = true;
-        
-        oi.style.border = disabled;
-        oi.disabled = true;
-        
-        os.style.border = disabled;
-        os.disabled = true;
-        
-        ot.style.border = disabled;
-        ot.disabled = true;
+      jp.style.border = disabled;
+      jp.disabled = true;
+      jp.style.display = 'none';
 
-        return;        
+      lg.style.border = disabled;
+      lg.disabled = true;
+      lg.style.display = 'none';
+
+      lo.style.border = disabled;
+      lo.disabled = true;
+      lo.style.display = 'none';
+    }
+
+    function handleRadioBtn(radio) {      
+      disableFields();
+
+      if (radio.value === 'tcp' || radio.value === 'udp') { 
+        enableFields();
+        return;
       }
     }
 
@@ -147,8 +177,10 @@
       if (check.value === '-d' || check.value === '--destination') {
         if (check.checked) { 
           od.disabled = false;
-          od.style.display = 'block'; 
-        } else { 
+          od.style.display = 'block';
+        } else {
+          let odfieldError = document.getElementById(`invalid-odestination`);
+          odfieldError.innerHTML = ""; 
           od.disabled = true;
           od.style.display = 'none'; 
         }
@@ -160,7 +192,9 @@
         if (check.checked) { 
           oi.disabled = false; 
           oi.style.display = 'block';
-        } else { 
+        } else {
+          let oifieldError = document.getElementById(`invalid-ointerface`);
+          oifieldError.innerHTML = ""; 
           oi.disabled = true; 
           oi.style.display = 'none';
         }
@@ -172,7 +206,9 @@
         if (check.checked) { 
           os.disabled = false; 
           os.style.display = 'block';
-        } else { 
+        } else {
+          let osfieldError = document.getElementById(`invalid-osource`);
+          osfieldError.innerHTML = ""; 
           os.disabled = true; 
           os.style.display = 'none';
         }
@@ -184,7 +220,9 @@
         if (check.checked) { 
           ot.disabled = false; 
           ot.style.display = 'block';
-        } else { 
+        } else {
+          let otfieldError = document.getElementById(`invalid-otype`);
+          otfieldError.innerHTML = "";  
           ot.disabled = true; 
           ot.style.display = 'none';
         }
@@ -228,49 +266,77 @@
         if (key === "odestination") {          
           od.style.borderColor = 'initial';
 
+          let odfieldError = document.getElementById(`invalid-${key}`);
+          odfieldError.innerHTML = "";
+
           if (ipv4Regex.test(value) || ipv6Regex.test(value)) {
+            od.setAttribute('aria-invalid', 'false');
             formObj[key] = value;
             return;
           }
 
+          let errorString = "[Error]: odestination is a required field.";
+          error.innerText = errorString;
           od.style.borderColor = '#e72727';
-          error.innerText = "[Error]: odestination is a required field.";          
+          od.setAttribute('aria-invalid', 'true');
+          odfieldError.innerHTML = errorString;
         }
         
         if (key === "ointerface") {          
           oi.style.borderColor = 'initial';
 
+          let oifieldError = document.getElementById(`invalid-${key}`);
+          oifieldError.innerHTML = "";
+
           if (value != "") {
+            oi.setAttribute('aria-invalid', 'false');
             formObj[key] = value;
             return;
           }
 
+          let errorString = "[Error]: ointerface is a required field.";
+          error.innerText = errorString;
           oi.style.borderColor = '#e72727';
-          error.innerText = "[Error]: ointerface is a required field.";
+          oi.setAttribute('aria-invalid', 'true');
+          oifieldError.innerHTML = errorString;
         }
 
-        if (key === "osource") {          
+        if (key === "osource") {
           os.style.borderColor = 'initial';
           
+          let osfieldError = document.getElementById(`invalid-${key}`);
+          osfieldError.innerHTML = "";
+
           if (ipv4Regex.test(value) || ipv6Regex.test(value)) {
+            os.setAttribute('aria-invalid', 'false');
             formObj[key] = value;
             return;
           }
 
+          let errorString = "[Error]: osource is a required field.";
+          error.innerText = errorString;
           os.style.borderColor = '#e72727';
-          error.innerText = "[Error]: osource is a required field.";
+          os.setAttribute('aria-invalid', 'true');
+          osfieldError.innerHTML = errorString;
         }
 
         if (key === "otype") {          
           ot.style.borderColor = 'initial';
 
+          let otfieldError = document.getElementById(`invalid-${key}`);
+          otfieldError.innerHTML = "";
+
           if (value === "ipv4" || value === "ipv6") {
+            ot.setAttribute('aria-invalid', 'false');
             formObj[key] = value;
             return;
           }
 
+          let errorString = "[Error]: otype is a required field.";
+          error.innerText = errorString;
           ot.style.borderColor = '#e72727';
-          error.innerText = "[Error]: otype is a required field.";
+          ot.setAttribute('aria-invalid', 'true');
+          otfieldError.innerHTML = errorString;
         }
 
         if (key === "action") {
@@ -341,7 +407,7 @@
 
       if (error.innerText != "") { return; }
 
-      formObj['options'] = options.join(' ').trimEnd();      
+      formObj['options'] = options.join(' ').trimEnd();
       const formJson = JSON.stringify(formObj);      
 
       result.innerText = 'send -> bastille ' + name;

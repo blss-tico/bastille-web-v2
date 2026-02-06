@@ -1,0 +1,30 @@
+{{define "base"}}
+  <!DOCTYPE html>
+  <html lang="pt-BR">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>{{.CommandName}}-Bastille-Web</title>
+      <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
+      <link rel="stylesheet" href="/static/pico.min.css" />
+      <link rel="stylesheet" href="/static/pico.colors.min.css" />
+      <link rel="stylesheet" href="/static/styles.css">
+    </head>
+    <body>
+      {{if eq .CommandName "login"}}
+        {{template "content" .}}
+      {{else}}
+        {{template "navbar" .}}
+        <div class="app">
+          {{template "sidebar" .}}
+          <main class="content container-fluid">{{template "content" .}}</main>
+        </div>
+        <footer class="container">
+          <small>© 2026 Bastille-Web. · <a href="#">Privacy</a> · <a href="#">Terms</a></small>
+        </footer>
+      {{end}}
+    </body>
+    <script src="/static/chart.js"></script>
+    <script src="/static/index.js"></script>
+  </html>
+{{end}}

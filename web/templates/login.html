@@ -1,0 +1,129 @@
+{{define "content"}}
+  <div class="login-body">
+    <div class="login-theme-switcher">
+      <a href="#" id="theme-toggle" aria-label="Toggle Dark Mode">🌙</a>
+    </div>
+    <main class="login-container">
+      <article>
+        <div class="login-header">
+          <img src="/static/logo.png" width="30px" height="30px" alt="Bastille-Web Logo">
+          <strong>Bastille-Web</strong>
+          <br>
+          <h4>Sign in</h4>
+          <p>Welcome back! Please enter your details.</p>
+        </div>
+        <div id="form-error"
+          style="display: none; color: var(--pico-del-color); margin-bottom: 1rem; font-size: 0.85rem;">
+          ❌ Invalid email or password. Please try again.
+        </div>
+        <form id="login-form">
+          <label for="email">
+            User name
+            <input type="text" id="username" name="username" placeholder="username" required>
+          </label>
+          <label for="password">
+            Password
+            <input type="password" id="password" name="password" placeholder="••••••••" required>
+          </label>
+          <fieldset>
+            <label for="remember">
+              <input type="checkbox" id="remember" name="remember">
+              Remember me
+            </label>
+          </fieldset>
+          <button type="submit" class="contrast" id="submit-btn">Login</button>
+        </form>
+        <footer>
+          <small>
+            Don't have an account? <a href="#">Sign up</a>
+          </small>
+        </footer>
+      </article>
+    </main>
+  </div>
+
+  <script>
+    const html = document.querySelector('html');
+    const themeBtn = document.getElementById('theme-toggle');
+
+    themeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const currentTheme = html.getAttribute('data-theme');
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      html.setAttribute('data-theme', newTheme);
+      themeBtn.textContent = newTheme === 'light' ? '🌙' : '☀️';
+      localStorage.setItem('theme', newTheme);
+    });
+
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      themeBtn.textContent = savedTheme === 'light' ? '🌙' : '☀️';
+    }
+
+    const loginForm = document.getElementById('login-form');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const errorMsg = document.getElementById('form-error');
+    const submitBtn = document.getElementById('submit-btn');
+    submitBtn.setAttribute('aria-busy', 'false');
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      usernameInput.removeAttribute('aria-invalid');
+      passwordInput.removeAttribute('aria-invalid');
+      errorMsg.style.display = 'none';
+      submitBtn.setAttribute('aria-busy', 'true');
+
+      const username = usernameInput.value;
+      const password = passwordInput.value;
+      const bodyData = JSON.stringify({ username, password });
+
+      await sendRequest(bodyData);
+      
+      /*
+      setTimeout(() => {
+        if (username === "admin" && password === "123456abc") {
+          window.location.href = '/home';
+        } else {
+          submitBtn.setAttribute('aria-busy', 'false');
+          usernameInput.setAttribute('aria-invalid', 'true');
+          passwordInput.setAttribute('aria-invalid', 'true');
+          errorMsg.style.display = 'block';
+        }
+      }, 1200);
+      */      
+    });
+
+    async function sendRequest(bodyData) {
+      const response = await fetch("http://{{.Ip}}:{{.Port}}/login", {
+        method: 'POST',
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+          'X-Request-ID': sessionStorage.getItem('id')
+        },
+        body: bodyData,
+        credentials: "include"
+      });
+
+      if (!response.ok) {    
+        const error = await response.text();
+        submitBtn.setAttribute('aria-busy', 'false');
+        usernameInput.setAttribute('aria-invalid', 'true');
+        passwordInput.setAttribute('aria-invalid', 'true');
+        errorMsg.innerText = error.message || error; 
+        errorMsg.style.display = 'block';
+      }
+      
+      await response.text();
+      submitBtn.setAttribute('aria-busy', 'false');
+      usernameInput.setAttribute('aria-invalid', 'false');
+      passwordInput.setAttribute('aria-invalid', 'false');
+      errorMsg.innerText = "";
+      window.location.href = '/home';
+    }
+  </script>
+{{end}}

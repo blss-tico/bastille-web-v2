@@ -1,0 +1,495 @@
+{{define "content"}}
+  {{if .SysInfo}}
+    <!-- nodes cards -->
+    <div class="cards">
+      <div 
+        class="card" 
+        id="{{.SysInfo.Hostname}}" 
+        onclick="nodeSelection('{{.SysInfo.Ip}}', '{{.SysInfo.Port}}', '{{.SysInfo.Hostname}}')"
+      >
+        <h4>[ {{ .SysInfo.Hostname}} ]</h4>
+        <strong>{{ .SysInfo.Ip}}:{{ .SysInfo.Port}}</strong><br>
+        <small class="secondary">HOSTNAME {{ .SysInfo.Hostname}}</small><br>
+        <small class="secondary">ARCH {{ .SysInfo.Arch}}</small><br>
+        <small class="secondary">PLATFORM {{ .SysInfo.Platform}}</small><br>
+        <small class="secondary">OS RELEASE  {{ .SysInfo.Osrelease}}</small><br>        
+        <small class="secondary">TOTAL MEMORY {{ .SysInfo.Totalmemory}} (Gb)</small><br>
+        <small class="secondary">BASTILLE VERSION {{ .SysInfo.BastilleVersion}}</small><br>
+      </div>
+
+      {{range .Nodes}}        
+        <div 
+          class="card" 
+          id="external-{{.Host}}" 
+          onclick="nodeExternal('{{.Ip}}', '{{.Port}}', '{{.Host}}')"          
+        >
+          <h4>[ {{ .Host}} ]</h4>            
+          <strong>{{ .Ip}}:{{.Port}}</strong>
+        </div>        
+      {{end}}
+    </div>
+
+    <!-- node jails table -->
+    <div class="card">
+      <h4>Jails [ {{ .SysInfo.Hostname}} ]</h4>
+      <table role="grid" id="jailsTable">
+        <thead data-theme="dark">
+          <tr>
+            <th class="tbl-hidden-td-data">JID</th>
+            <th class="tbl-hidden-td-data">BOOT</th>
+            <th class="tbl-hidden-td-data">PRIO</th>
+            <th>STATE</th>
+            <th>IP ADDRESS</th>
+            <th class="tbl-hidden-td-data">PUBLISHED PORTS</th>
+            <th>HOSTNAME</th>
+            <th class="tbl-hidden-td-data">RELEASE</th>
+            <th class="tbl-hidden-td-data">PATH</th>
+            <th>ACTION</th>            
+            <th>MENU</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <br>
+
+    <!-- modal to show errors -->
+    <dialog id="homeErrorModal">
+      <article>
+        <h3>Error</h3>
+        <p class="home-modal-text" id="homeErrorModalText"></p>
+        <footer>
+          <button class="primary" onclick="closeModal()">Close</button>
+        </footer>
+      </article>
+    </dialog>
+
+    <!-- modal to show commands -->
+    <dialog id="homeCmdsModal" class="dialog-cmds">
+      <article class="dialog-cmds-content">
+        <header>          
+          <button id="btn-close-dialog" class="btn-close-dialog" onclick="closeCmdsModal()">x</button>
+          <strong>&nbsp;&nbsp;Jail Commands <span id="homeCmdsJail"></span></strong>
+        </header>
+        <p class="home-modal-cmds-text" id="homeCmdsModalText">
+          {{range .Data.Commands}}
+            {{if and (ne .Command "edit")}}
+              <span class="home-modal-cmds-links" onclick="location.href='/{{.Command}}';">
+                <a href="/{{.Command}}">{{.Command}}</a>
+              </span>
+            {{end}}
+          {{end}}
+        </p>
+        <hr>
+        <footer>
+          <button class="primary" onclick="closeCmdsModal()">Cancel</button>
+        </footer>
+      </article>
+    </dialog>
+
+    <!-- charts -->
+    <!-- div class="card">      
+      <h4>Revenue Trend</h4>
+      <canvas id="revenueChart" height="120"></canvas>
+    </div>
+    <br>
+    <div class="card">
+      <h4>User Growth</h4>
+      <canvas id="userChart" height="120"></canvas>
+    </div -->
+  {{end}}
+
+  <script>
+    console.log('[info]: Home page');
+
+    const thisMachine = "{{.SysInfo.Hostname}}";
+    const timeout = 5000;
+    
+    let iframe;
+    let btnsStart = document.getElementsByClassName("btn-home-start-jail");
+    let btnsStop = document.getElementsByClassName("btn-home-stop-jail");    
+    
+    let hmModal = document.getElementById("homeErrorModal");
+    let hmModalTxt = document.getElementById("homeErrorModalText");
+    hmModal.style.display = 'none';
+    
+    let hmCmdsModal = document.getElementById("homeCmdsModal");
+    let hmCmdsModalTxt = document.getElementById("homeCmdsModalText");
+    hmCmdsModal.style.display = 'none';
+
+    (function init () {
+      console.log("[info]: init");
+
+      const nodes = "{{.Nodes}}";
+      const items = nodes.replace(/[\[\]{}]/g, "").trim().split(/\s{2,}|\s(?=srv)/); 
+      const servers = items.filter(Boolean).map(str => { 
+        const [name, ip, port] = str.trim().split(/\s+/); 
+        return { name, ip, port: Number(port) }; 
+      });
+      
+      if (servers.length > 0) {
+        servers.forEach(async s => {
+          await loadNodeInfo(s.ip, s.port, s.name);
+        });
+      }
+
+      sessionStorage.removeItem("ipaddr");
+      sessionStorage.setItem("ipaddr", "{{.SysInfo.Ip}}");
+      sessionStorage.removeItem("port");
+      sessionStorage.setItem("port", "{{.SysInfo.Port}}");
+      sessionStorage.removeItem("hostname");
+      sessionStorage.setItem("hostname", "{{.SysInfo.Hostname}}");
+
+      nodeSelection(
+        sessionStorage.getItem('ipaddr'), 
+        sessionStorage.getItem('port'), 
+        sessionStorage.getItem('hostname')
+      );
+    })();
+    
+    function redirectUrl() {
+      window.location.href = "http://{{.SysInfo.Ip}}:{{.SysInfo.Port}}/";
+    }
+
+    function disableButtons() {
+      for (const btna of btnsStart) { btna.setAttribute('disabled', ''); }
+      for (const btno of btnsStop) { btno.setAttribute('disabled', ''); }
+    }
+
+    function enableButtons() {
+      for (const btna of btnsStart) { btna.setAttribute('enabled', ''); }
+      for (const btno of btnsStop) { btno.setAttribute('enabled', ''); }
+    }
+
+    function closeModal() {
+      hmModal.style.display = 'none';
+    }
+
+    function openCmdsModal(hostName) {
+      const hostJail = document.getElementById('homeCmdsJail');
+      hostJail.innerText = `[ ${hostName} ]`;
+      hmCmdsModal.style.display = 'block';
+    }
+
+    function closeCmdsModal() {
+      hmCmdsModal.style.display = 'none';
+    }
+
+    function nodeExternal(ipAddr, port, hostName) {
+      window.open(`http://${ipAddr}:${port}/`);
+    }
+
+    async function nodeSelection(ipAddr, port, hostName) {
+      console.log(`[info]: nodeSelection ${ipAddr}:${port} - ${hostName}`);
+
+      setNode(ipAddr, port, hostName);
+      await loadTables();
+    }
+
+    function setNode(ipAddr, port, hostName) {
+      console.log(`[info]: setNode ${ipAddr}:${port} - ${hostName}`);
+
+      sessionStorage.removeItem("ipaddr");
+      sessionStorage.setItem("ipaddr", ipAddr);
+      sessionStorage.removeItem("port");
+      sessionStorage.setItem("port", port);
+      sessionStorage.removeItem("hostname");
+      sessionStorage.setItem("hostname", hostName);
+
+      let nHst = document.getElementById(hostName);
+      nHst.style.borderColor = "#01aaff";
+      console.log("[info]: node selected ", sessionStorage.getItem('hostname'))
+
+      // if (hostName === thisMachine) { return; }
+    }
+
+    async function loadNodeInfo(ipAddr, port, hostName) {
+      console.log(`[info]: loadNodeInfo`);
+
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeout);
+
+      try {
+        const response = await fetch(`http://${ipAddr}:${port}/node`, {      
+          signal: controller.signal
+        });
+        
+        clearTimeout(id);
+
+        if (response.status !== 200) { throw new Error(response.status); }        
+        const dt = await response.json();
+
+        // create node card dynamicaly
+        const data = Object.entries(dt);
+        if (data.length > 0) {
+          data.forEach((value, idx) => {
+            let smallExists = document.getElementById("small"+hostName+String(idx));
+            if (smallExists) { return; }
+
+            let hstCard = document.getElementById("external-"+hostName);
+            let small = document.createElement('small');
+            small.id = "small"+hostName+String(idx);
+            small.innerHTML = `<br> ${value[0].toUpperCase()} ${value[1]}`;
+            hstCard.appendChild(small);
+          });
+        }        
+      } catch (error) {
+        let msg;
+
+        if (error.name === 'AbortError') { 
+          //hmModalTxt.innerText = 'Failed to load remote node information';
+          msg = `Failed to get remote node information - ${hostName}`;           
+        } else {          
+          // hmModalTxt.innerText = error; 
+          msg = `Error: ${error.message} - ${hostName}`;
+        }
+        
+        //hmModal.style.display = 'block';
+        document.dispatchEvent(notifEventIndex(msg));
+      }
+    }
+
+    async function loadTables() {
+      console.log(`[info]: loadTables`);
+
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeout);
+
+      try {       
+        const bodyData = { options: "-j", action: "all" };
+        const response = await fetch(`/list`, {
+          method: 'POST',         
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Content-Type': 'application/json',
+            'X-Request-ID': sessionStorage.getItem('id')
+          },
+          body: JSON.stringify(bodyData),
+          signal: controller.signal
+        });
+
+        clearTimeout(id);
+
+        if (!response.ok) { throw new Error("error to load table data"); }
+        const data = await response.json();
+        const trData = JSON.parse(data.msg);
+        
+        // create table body dynamically
+        let result = '';
+        trData.forEach((tr, idx) => {
+          if (tr.State === "Up") {
+            result += `<tr class='tbl-home-list-jails-up'>`;
+          } else {
+            result += `<tr class='tbl-home-list-jails-down'>`;
+          }
+
+          result += `            
+            <td data-label="JID" class="tbl-hidden-td-data">${tr.JID}</td>
+            <td data-label="BOOT" class="tbl-hidden-td-data">${tr.Boot}</td>
+            <td data-label="PRIO" class="tbl-hidden-td-data">${tr.Prio}</td>
+            <td data-label="STATE">${tr.State}</td>
+            <td data-label="IP Address">${tr['IP Address']}</td>
+            <td data-label="Published Ports" class="tbl-hidden-td-data">${tr["Published Ports"]}</td>
+            <td data-label="HOSTNAME">${tr.Hostname}</td>
+            <td data-label="RELEASE" class="tbl-hidden-td-data">${tr.Release}</td>
+            <td data-label="PATH" class="tbl-hidden-td-data">${tr.Path}</td>
+          `;
+          
+          if (tr.State === "Up") {
+            result += `
+              <td data-label="ACTION" class="tbl-home-td-btns">
+                <small>
+                  <button 
+                    id="startJailBtn${idx}"
+                    class="secondary btn-home-start-jail" 
+                    data-tooltip="Start Jail"
+                    onclick="startJail('${tr.Hostname}', '${idx}')" 
+                    disabled
+                  >
+                    START
+                  </button>
+                </small>
+                &nbsp;
+                <small>
+                  <button
+                    id="stopJailBtn${idx}" 
+                    class="primary btn-home-stop-jail"
+                    data-tooltip="Stop Jail"
+                    onclick="stopJail('${tr.Hostname}', '${idx}')"                       
+                  >
+                    STOP
+                  </button>
+                </small>
+              </td>
+            `;
+          } else {
+            result += `
+              <td data-label="ACTION" class="tbl-home-td-btns">
+                <small>
+                  <button 
+                    id="startJailBtn${idx}"
+                    class="secondary btn-home-start-jail" 
+                    data-tooltip="Start Jail"
+                    onclick="startJail('${tr.Hostname}', '${idx}')"                       
+                  >
+                    START
+                  </button>
+                </small>
+                &nbsp;
+                <small>
+                  <button 
+                    id="stopJailBtn${idx}"
+                    class="primary btn-home-stop-jail"
+                    data-tooltip="Stop Jail"
+                    onclick="stopJail('${tr.Hostname}', '${idx}')" 
+                    disabled
+                  >
+                    STOP
+                  </button>
+                </small>
+              </td>
+            `;
+          }
+
+          result += `              
+              <td>
+                <button id="tbl-btn-menu" class="outline contrast" onclick="openCmdsModal('${tr.Hostname}')">☰</button>
+              </td>  
+            </tr>
+          `;
+        });
+        
+        let tableBody = document.querySelector("#jailsTable tbody");
+        tableBody.innerHTML = result;
+      } catch (error) {
+        let msg;
+        if (error.name === 'AbortError') { msg = `Failed to load jails table data - ${hostName}`;           
+        } else { msg = `Error: ${error.message} - ${hostName}`; }
+        document.dispatchEvent(notifEventIndex(msg));
+      }
+    }
+
+    async function startJail(target, idx) {
+      console.log("[info]: startJail ", target);
+
+      disableButtons();
+    
+      const bodyData = { options: "", target: target, value: "" };
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeout);
+
+      let startJailBtn = document.getElementById(`startJailBtn${idx}`);
+      startJailBtn.classList.add('loading');
+      startJailBtn.innerHTML = '<span class="spinner"></span>';
+
+      try {
+        const response = await fetch(`/start`, {
+          method: 'POST',          
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'accept': 'application/json',
+            'Content-Type': 'application/json',
+            'X-Request-ID': sessionStorage.getItem('id')
+          },
+          body: JSON.stringify(bodyData),
+          signal: controller.signal
+        });
+        
+        clearTimeout(id);
+
+        if (!response.ok) {        
+          const error = await response.text();
+          throw new Error(error);
+        }
+        
+        enableButtons();
+        redirectUrl();
+      } catch (error) {
+        let msg;
+        if (error.name === 'AbortError') { msg = `Failed to start jail - ${target}`; } 
+        else { msg = `Error: ${error.message} - ${target}`; }
+        document.dispatchEvent(notifEventIndex(msg));
+      }
+
+      startJailBtn.classList.remove('loading');
+      startJailBtn.innerHTML = 'Start';
+    }
+
+    async function stopJail(target, idx) {
+      console.log("[info]: stopJail ", target);
+
+      disableButtons();
+      
+      const bodyData = { options: "", target: target };
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeout);
+
+      let stopJailBtn = document.getElementById(`stopJailBtn${idx}`);
+      stopJailBtn.classList.add('loading');
+      stopJailBtn.innerHTML = '<span class="spinner"></span>';
+
+      try {
+        const response = await fetch(`/stop`, {
+          method: 'POST',
+          headers: {
+            'access-control-allow-origin': '*',
+            'accept': 'application/json',
+            'Content-Type': 'application/json',
+            'X-Request-ID': sessionStorage.getItem('id')
+          },
+          body: JSON.stringify(bodyData),
+          signal: controller.signal
+        });
+        
+        clearTimeout(id);
+
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(error);
+        }
+
+        enableButtons();
+        redirectUrl();
+      } catch (error) {
+        let msg;
+        if (error.name === 'AbortError') {  msg = `Failed to stop jail - ${target}`; } 
+        else { msg = `Error: ${error.message} - ${target}`; }
+        document.dispatchEvent(notifEventIndex(msg));
+      }
+
+      stopJailBtn.classList.remove('loading');
+      stopJailBtn.innerHTML = 'Stop';
+    }
+
+    // charts logic
+    setTimeout(() => {
+      console.log('[info]: charts loaded');
+
+      // Charts
+      new Chart(document.getElementById('revenueChart'), {
+        type: 'line',
+        data: {
+          labels: ['Jan','Feb','Mar','Apr','May','Jun'],
+          datasets: [{
+            label: 'Revenue',
+            data: [10000,12000,15000,17000,16000,18000],
+            borderColor: 'green',
+            fill: false
+          }]
+        }
+      });
+
+      new Chart(document.getElementById('userChart'), {
+        type: 'bar',
+        data: {
+          labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+          datasets: [{
+            label: 'Active Users',
+            data: [1200,1350,1400,1500,1600,1700,1800],
+            backgroundColor: 'blue'
+          }]
+        }
+      });
+    }, 500);
+  </script>
+{{end}}

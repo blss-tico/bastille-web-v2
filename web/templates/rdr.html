@@ -1,0 +1,432 @@
+{{define "content"}}
+  <div class="card">
+    {{$parentContext := .}}
+    {{range .Data.Commands}}
+      {{if eq .Command $.CommandName}}
+        <header>{{.Command}} <span id="hostName"></span> </header>
+        <br>
+        <form id="{{$.CommandName}}-form" class="card-form">
+          <fieldset>
+            {{range .Fields}}
+              {{if eq . "TARGET"}}
+                <select name="{{.}}" id="{{.}}" aria-label="{{.}}" required></select>
+                <small id="invalid-{{.}}"></small>
+              {{end}}
+            {{end}}
+
+            <div class="create-form-options">
+              {{range .Fields}}
+                {{if or (eq . "clear") (eq . "reset") (eq . "list") (eq . "tcp") (eq . "udp")}}
+                  <fieldset>
+                    <label for="action">
+                      <input type="radio" name="action" value="{{.}}" id="{{.}}" onchange="handleRadioBtn(this)" />
+                      {{.}}
+                    </label>
+                  </fieldset>
+                {{end}}
+              {{end}}
+            </div>
+            
+            {{range .Fields}}
+              {{if or (eq . "HOST_PORT") (eq . "JAIL_PORT") (eq . "log") (eq . "logopts")}}
+                <input type="text" placeholder="{{.}}" name="{{.}}" id="{{.}}" class="input-text"
+                  aria-describedby="invalid-{{.}}" />
+                <small id="invalid-{{.}}"></small>
+              {{end}}
+            {{end}}
+
+            {{range .Fields}}
+              {{if or (eq . "odestination") (eq . "ointerface") (eq . "osource") (eq . "otype")}}
+                <input type="text" name="{{.}}" id="{{.}}" placeholder="{{.}}" />
+                <small id="invalid-{{.}}"></small>
+              {{end}}
+            {{end}}            
+          </fieldset>
+          <fieldset>
+            <legend>Options</legend>
+            {{range .Options}}
+              <input type="checkbox" name="options_{{.Lflag}}" value="{{.Sflag}}" role="switch" onchange="handleCheckBox(this)"/>{{.Lflag}}&nbsp;
+            {{end}}
+          </fieldset>
+          <div class="grid">
+            <button id="submitBtn" class="secondary btn-card-submit" onclick="rdrSubmit(event)">Submit</button>
+            <button class="primary btn-card-help" onclick="helpED(event)">Help</button>
+            <button class="outline contrast" onclick="backToHome(event)">Home</button>
+          </div>
+        </form>
+        <br>
+        <div class="card-footer">
+          <div class="card-help" id="card-help">
+            <h3>Help</h3>
+            <small class="secondary">{{.Description}}</small>
+            <br><br>
+            <p>{{.Help}}</p>
+            <div class="card-help-options">
+              {{range .Options}}
+                <p>&nbsp;&nbsp;{{.Sflag}}&nbsp;|&nbsp;{{.Lflag}}&nbsp;-&nbsp;{{.Text}}</p>
+              {{end}}
+            </div>
+          </div>
+          <br>
+          <div class="card-results">
+            <p id="result" class="card-result"></p>
+            <p id="error" class="card-error"></p>
+          </div>
+        </div>
+      {{end}}
+    {{end}}
+  </div>
+
+  <script>
+    let hlp = document.getElementById("card-help");
+    hlp.style.display = 'none';
+
+    let hostName = document.getElementById('hostName');
+    hostName.innerHTML = `[${sessionStorage.getItem('hostname')}]`;
+
+    let tgt = document.getElementById('TARGET');
+    let jails = sessionStorage.getItem('jails');
+    let pjails = JSON.parse(jails);
+    pjails.forEach(j => {
+      const option = document.createElement("option");
+      option.value = j.Hostname;
+      option.textContent = j.Hostname;
+      tgt.appendChild(option);
+    });
+
+    function helpED(event) {
+      event.preventDefault();     
+      hlp.style.display === 'none' ?  hlp.style.display = 'block' : hlp.style.display = 'none';
+    }
+
+    const enabled = '1px solid #8f8f9d';
+    const disabled = '1px solid #ccc';
+
+    let hp = document.getElementById("HOST_PORT");
+    let jp = document.getElementById("JAIL_PORT");
+    let lg = document.getElementById("log");
+    let lo = document.getElementById("logopts");
+    disableFields();
+
+    let od = document.getElementById("odestination");
+    od.style.border = disabled;
+    od.disabled = true;
+    od.style.display = 'none';
+
+    let oi = document.getElementById("ointerface");
+    oi.style.border = disabled;
+    oi.disabled = true;
+    oi.style.display = 'none';
+
+    let os = document.getElementById("osource");
+    os.style.border = disabled;
+    os.disabled = true;
+    os.style.display = 'none';
+
+    let ot = document.getElementById("otype");
+    ot.style.border = disabled;
+    ot.disabled = true;
+    ot.style.display = 'none';
+
+    function enableFields() {
+      hp.style.border = enabled;
+      hp.disabled = false;
+      hp.style.display = 'block';
+
+      jp.style.border = enabled;
+      jp.disabled = false;
+      jp.style.display = 'block';
+
+      lg.style.border = enabled;
+      lg.disabled = false;
+      lg.style.display = 'block';
+      
+      lo.style.border = enabled;
+      lo.disabled = false;
+      lo.style.display = 'block';
+    }
+
+    function disableFields() {    
+      hp.style.border = disabled;
+      hp.disabled = true;
+      hp.style.display = 'none';
+
+      jp.style.border = disabled;
+      jp.disabled = true;
+      jp.style.display = 'none';
+
+      lg.style.border = disabled;
+      lg.disabled = true;
+      lg.style.display = 'none';
+
+      lo.style.border = disabled;
+      lo.disabled = true;
+      lo.style.display = 'none';
+    }
+
+    function handleRadioBtn(radio) {      
+      disableFields();
+
+      if (radio.value === 'tcp' || radio.value === 'udp') { 
+        enableFields();
+        return;
+      }
+    }
+
+    function handleCheckBox(check) {  
+      if (check.value === '-d' || check.value === '--destination') {
+        if (check.checked) { 
+          od.disabled = false;
+          od.style.display = 'block';
+        } else {
+          let odfieldError = document.getElementById(`invalid-odestination`);
+          odfieldError.innerHTML = ""; 
+          od.disabled = true;
+          od.style.display = 'none'; 
+        }
+
+        return;
+      }
+
+      if (check.value === '-i' || check.value === '--interface') {
+        if (check.checked) { 
+          oi.disabled = false; 
+          oi.style.display = 'block';
+        } else {
+          let oifieldError = document.getElementById(`invalid-ointerface`);
+          oifieldError.innerHTML = ""; 
+          oi.disabled = true; 
+          oi.style.display = 'none';
+        }
+        
+        return;
+      }
+
+      if (check.value === '-s' || check.value === '--source') {
+        if (check.checked) { 
+          os.disabled = false; 
+          os.style.display = 'block';
+        } else {
+          let osfieldError = document.getElementById(`invalid-osource`);
+          osfieldError.innerHTML = ""; 
+          os.disabled = true; 
+          os.style.display = 'none';
+        }
+        
+        return;
+      }
+
+      if (check.value === '-t' || check.value === '--type') {
+        if (check.checked) { 
+          ot.disabled = false; 
+          ot.style.display = 'block';
+        } else {
+          let otfieldError = document.getElementById(`invalid-otype`);
+          otfieldError.innerHTML = "";  
+          ot.disabled = true; 
+          ot.style.display = 'none';
+        }
+        
+        return;
+      }
+    }
+
+    function backToHome(event) {
+      event.preventDefault();
+
+      const ipaddr = sessionStorage.getItem('ipaddr');
+      const port = sessionStorage.getItem('port');
+      window.location.href = `http://${ipaddr}:${port}/`;
+    }
+
+    async function rdrSubmit(event) {
+      event.preventDefault();
+
+      const name = '{{$.CommandName}}';
+      const result = document.getElementById('result');
+      const error = document.getElementById('error');
+      result.innerText = "";
+      error.innerText = ""; 
+
+      const form = document.getElementById(name + '-form');
+      const formData = new FormData(form);      
+      let options = [];      
+      let formObj = {};
+
+      const ipv4Regex = /^(?:(?:25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)$/;
+      const ipv6Regex = /^((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?$/;
+      formData.forEach((value, key) => {
+        if (key.indexOf('options_--debug') != -1) {          
+          options.push(value);
+          return;
+        }
+
+        value = value.trim();
+
+        if (key === "odestination") {          
+          od.style.borderColor = 'initial';
+
+          let odfieldError = document.getElementById(`invalid-${key}`);
+          odfieldError.innerHTML = "";
+
+          if (ipv4Regex.test(value) || ipv6Regex.test(value)) {
+            od.setAttribute('aria-invalid', 'false');
+            formObj[key] = value;
+            return;
+          }
+
+          let errorString = "[Error]: odestination is a required field.";
+          error.innerText = errorString;
+          od.style.borderColor = '#e72727';
+          od.setAttribute('aria-invalid', 'true');
+          odfieldError.innerHTML = errorString;
+        }
+        
+        if (key === "ointerface") {          
+          oi.style.borderColor = 'initial';
+
+          let oifieldError = document.getElementById(`invalid-${key}`);
+          oifieldError.innerHTML = "";
+
+          if (value != "") {
+            oi.setAttribute('aria-invalid', 'false');
+            formObj[key] = value;
+            return;
+          }
+
+          let errorString = "[Error]: ointerface is a required field.";
+          error.innerText = errorString;
+          oi.style.borderColor = '#e72727';
+          oi.setAttribute('aria-invalid', 'true');
+          oifieldError.innerHTML = errorString;
+        }
+
+        if (key === "osource") {
+          os.style.borderColor = 'initial';
+          
+          let osfieldError = document.getElementById(`invalid-${key}`);
+          osfieldError.innerHTML = "";
+
+          if (ipv4Regex.test(value) || ipv6Regex.test(value)) {
+            os.setAttribute('aria-invalid', 'false');
+            formObj[key] = value;
+            return;
+          }
+
+          let errorString = "[Error]: osource is a required field.";
+          error.innerText = errorString;
+          os.style.borderColor = '#e72727';
+          os.setAttribute('aria-invalid', 'true');
+          osfieldError.innerHTML = errorString;
+        }
+
+        if (key === "otype") {          
+          ot.style.borderColor = 'initial';
+
+          let otfieldError = document.getElementById(`invalid-${key}`);
+          otfieldError.innerHTML = "";
+
+          if (value === "ipv4" || value === "ipv6") {
+            ot.setAttribute('aria-invalid', 'false');
+            formObj[key] = value;
+            return;
+          }
+
+          let errorString = "[Error]: otype is a required field.";
+          error.innerText = errorString;
+          ot.style.borderColor = '#e72727';
+          ot.setAttribute('aria-invalid', 'true');
+          otfieldError.innerHTML = errorString;
+        }
+
+        if (key === "action") {
+          formObj[key] = value;
+          return;
+        }
+
+        if (key === "TARGET") {
+          let t = document.getElementById(key);
+          t.style.borderColor = 'initial';
+
+          let tfieldError = document.getElementById(`invalid-${key}`);
+          tfieldError.innerHTML = "";
+
+          if (value != "") {
+            t.setAttribute('aria-invalid', 'false');
+            formObj[key] = value;
+            return;
+          }
+
+          let errorString = "[Error]: TARGET is a required field.";
+          error.innerText = errorString;
+          t.style.borderColor = '#e72727';
+          t.setAttribute('aria-invalid', 'true');
+          tfieldError.innerHTML = errorString;
+        }
+
+        if (key === "HOST_PORT") {
+          let hp = document.getElementById(key);
+          hp.style.borderColor = 'initial';
+
+          let hpfieldError = document.getElementById(`invalid-${key}`);
+          hpfieldError.innerHTML = "";
+
+          if (value != "") {
+            hp.setAttribute('aria-invalid', 'false');
+            formObj[key] = value;
+            return;
+          }
+
+          let errorString = "[Error]: HOST_PORT is a required field.";
+          error.innerText = errorString;
+          hp.style.borderColor = '#e72727';
+          hp.setAttribute('aria-invalid', 'true');
+          hpfieldError.innerHTML = errorString;
+        }
+
+        if (key === "JAIL_PORT") {
+          let jp = document.getElementById(key);
+          jp.style.borderColor = 'initial';
+
+          let jpfieldError = document.getElementById(`invalid-${key}`);
+          jpfieldError.innerHTML = "";
+
+          if (value != "") {
+            jp.setAttribute('aria-invalid', 'false');
+            formObj[key] = value;
+            return;
+          }
+
+          let errorString = "[Error]: JAIL_PORT is a required field.";
+          error.innerText = errorString;
+          jp.style.borderColor = '#e72727';
+          jp.setAttribute('aria-invalid', 'true');
+          jpfieldError.innerHTML = errorString;
+        }
+      });
+
+      if (error.innerText != "") { return; }
+
+      formObj['options'] = options.join(' ').trimEnd();
+      const formJson = JSON.stringify(formObj);      
+
+      result.innerText = 'send -> bastille ' + name;
+
+      let submitBtn = document.getElementById('submitBtn');
+      submitBtn.classList.add('loading');
+      submitBtn.innerHTML = '<span class="spinner"></span>';
+
+      const response = await sendHttpRequest(name, formJson);
+      if (response.code == 200) {
+        error.innerText = "";
+        result.innerText = response.data.msg;
+      } else {
+        result.innerText = "";
+        error.innerText = response.error;
+      }
+
+      submitBtn.classList.remove('loading');
+      submitBtn.innerHTML = 'Submit';
+    }
+  </script>
+{{end}}

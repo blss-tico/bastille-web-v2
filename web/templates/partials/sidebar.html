@@ -1,0 +1,56 @@
+{{define "sidebar"}}
+  <aside class="sidebar" id="sidebar">
+    <nav>
+      <ul>
+        <li role="button" class="outline"><a href="/">HOME</a></li><br>
+        <li role="button" class="outline"><a href="/api">API</a></li><br>
+        <li role="button" class="outline"><a href="/config">CONFIG</a></li><br>
+        <li role="button" class="outline"><a href="/help">HELP</a></li><br>
+        <li role="button" class="outline"><a href="/contact">CONTACT</a></li>
+      </ul>
+      <br>
+      <details>
+        <summary role="button" class="outline">COMMANDS</summary>
+        <ul>
+          {{range .Data.Commands}}
+            {{if and (ne .Command "edit")}}
+              <li role="button" class="outline"><a href="/{{.Command}}">{{.Command}}</a></li>            
+            {{end}}
+          {{end}}
+        </ul>
+      </details>
+    </nav>
+  </aside>
+
+  <div id="sidebarBackdrop" class="sidebar-backdrop"></div>
+
+  <script>
+    console.log('[info]: Sidebar page');
+
+    // Sidebar toggle (mobile)
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+
+    function openSidebar() {
+      sidebar.classList.add('open');
+      sidebarBackdrop.classList.add('show');
+    }
+    
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+      sidebarBackdrop.classList.remove('show');
+    }
+
+    sidebarToggle.addEventListener('click', () => {
+      const isOpen = sidebar.classList.contains('open');
+      isOpen ? closeSidebar() : openSidebar();
+    });
+
+    sidebarBackdrop.addEventListener('click', closeSidebar);
+    
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeSidebar();
+    });
+  </script>
+{{end}}

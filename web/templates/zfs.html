@@ -1,0 +1,353 @@
+{{define "content"}}
+  <div class="card">
+    {{$parentContext := .}}
+    {{range .Data.Commands}}
+      {{if eq .Command $.CommandName}}
+        <header>{{.Command}} <span id="hostName"></span> </header>
+        <br>
+        <form id="{{$.CommandName}}-form" class="card-form">
+          <fieldset>
+            {{range .Fields}}
+              {{if eq . "TARGET"}}                    
+                <select name="{{.}}" id="{{.}}" aria-label="{{.}}" required></select>
+                <small id="invalid-{{.}}"></small>
+              {{end}}
+            {{end}}
+          </fieldset>          
+          <fieldset>
+            <div class="create-form-options">
+              {{range .Fields}}
+                {{if or (eq . "destroy") (eq . "rollback") (eq . "snapshot") (eq . "df") (eq . "usage") (eq . "get") (eq . "set") (eq . "jail") (eq . "unjail")}}
+                  <fieldset>
+                    <label for="action">
+                      <input type="radio" id="{{.}}" name="action" value="{{.}}" onchange="handleRadioBtn(this)" />
+                      {{.}}
+                    </label>
+                  </fieldset>                
+                {{end}}
+              {{end}}
+            </div>
+          </fieldset>
+          <fieldset>
+            {{range .Fields}}
+              {{if or (eq . "TAG") (eq . "key") (eq . "value") (eq . "pool/dataset") (eq . "/jail/path") }}
+                <input type="text" placeholder="{{.}}" name="{{.}}" id="{{.}}" class="input-text"
+                  aria-describedby="invalid-{{.}}" />
+                <small id="invalid-{{.}}"></small>
+              {{end}}
+            {{end}}
+          </fieldset>
+          <fieldset>
+            <legend>Options</legend>
+            {{range .Options}}
+              <input type="checkbox" name="options_{{.Lflag}}" value="{{.Sflag}}" role="switch" />{{.Lflag}}&nbsp;
+            {{end}}
+          </fieldset>
+          <div class="grid">
+            <button id="submitBtn" class="secondary btn-card-submit" onclick="zfsSubmit(event)">Submit</button>
+            <button class="primary btn-card-help" onclick="helpED(event)">Help</button>
+            <button class="outline contrast" onclick="backToHome(event)">Home</button>
+          </div>
+        </form>
+        <br>
+        <div class="card-footer">
+          <div class="card-help" id="card-help">
+            <h3>Help</h3>
+            <small class="secondary">{{.Description}}</small>
+            <br><br>
+            <p>{{.Help}}</p>
+            <div class="card-help-options">
+              {{range .Options}}
+                <p>&nbsp;&nbsp;{{.Sflag}}&nbsp;|&nbsp;{{.Lflag}}&nbsp;-&nbsp;{{.Text}}</p>
+              {{end}}
+            </div>
+          </div>
+          <br>
+          <div class="card-results">
+            <p id="result" class="card-result"></p>
+            <p id="error" class="card-error"></p>
+          </div>
+        </div>
+      {{end}}
+    {{end}}
+  </div>
+
+  <script>
+    let hlp = document.getElementById("card-help");
+    hlp.style.display = 'none';
+
+    let hostName = document.getElementById('hostName');
+    hostName.innerHTML = `[${sessionStorage.getItem('hostname')}]`;
+
+    let tgt = document.getElementById('TARGET');
+    let jails = sessionStorage.getItem('jails');
+    let pjails = JSON.parse(jails);
+    pjails.forEach(j => {
+      const option = document.createElement("option");
+      option.value = j.Hostname;
+      option.textContent = j.Hostname;
+      tgt.appendChild(option);
+    });
+
+    function helpED(event) {
+      event.preventDefault();     
+      hlp.style.display === 'none' ?  hlp.style.display = 'block' : hlp.style.display = 'none';
+    }
+
+    const enabled = '1px solid #8f8f9d';
+    const disabled = '1px solid #ccc';
+
+    let tg = document.getElementById("TAG");
+    tg.style.border = disabled;
+    tg.disabled = true;
+    tg.style.display = 'none';
+
+    let k = document.getElementById("key");
+    k.style.border = disabled;
+    k.disabled = true;
+    k.style.display = 'none';
+
+    let v = document.getElementById("value");
+    v.style.border = disabled;
+    v.disabled = true;
+    v.style.display = 'none';
+
+    let pd = document.getElementById("pool/dataset");
+    pd.style.border = disabled;
+    pd.disabled = true;
+    pd.style.display = 'none';
+    
+    let jp = document.getElementById("/jail/path");
+    jp.style.border = disabled;
+    jp.disabled = true;
+    jp.style.display = 'none';
+
+    function handleRadioBtn(radio) {
+      tg.style.border = disabled;
+      tg.disabled = true;
+      tg.style.display = 'none';
+
+      k.style.border = disabled;
+      k.disabled = true;
+      k.style.display = 'none';
+
+      v.style.border = disabled;
+      v.disabled = true;
+      v.style.display = 'none';
+
+      pd.style.border = disabled;
+      pd.disabled = true;
+      pd.style.display = 'none';
+
+      jp.style.border = disabled;
+      jp.disabled = true;
+      jp.style.display = 'none';
+
+      if (radio.value === 'destroy' || radio.value === 'rollback' || radio.value === 'snapshot') { 
+        tg.style.display = 'block';
+        tg.style.border = enabled;
+        tg.disabled = false;
+      }
+
+      if (radio.value === 'get' || radio.value === 'set') { 
+        k.style.display = 'block';
+        k.style.border = enabled;
+        k.disabled = false;
+
+        v.style.display = 'block';
+        v.style.border = enabled;
+        v.disabled = false;
+      }
+
+      if (radio.value === 'jail') { 
+        pd.style.display = 'block';
+        pd.style.border = enabled;
+        pd.disabled = false;
+
+        jp.style.display = 'block';
+        jp.style.border = enabled;
+        jp.disabled = false;
+      }
+
+      if (radio.value === 'unjail') {        
+        pd.style.display = 'block';
+        pd.style.border = enabled;
+        pd.disabled = false;
+      }
+    }
+
+    function backToHome(event) {
+      event.preventDefault();
+
+      const ipaddr = sessionStorage.getItem('ipaddr');
+      const port = sessionStorage.getItem('port');
+      window.location.href = `http://${ipaddr}:${port}/`;
+    }
+
+    async function zfsSubmit(event) {
+      event.preventDefault();
+
+      const name = '{{$.CommandName}}';
+      const result = document.getElementById('result');
+      const error = document.getElementById('error');
+      result.innerText = "";
+      error.innerText = ""; 
+
+      const form = document.getElementById(name + '-form');
+      const formData = new FormData(form);      
+      let options = [];
+      let formObj = {};
+      formData.forEach((value, key) => {
+        if (key.indexOf('options_') != -1) {
+          options.push(value);
+          return;
+        }
+
+        value = value.trim();
+
+        if (key === "TARGET") {
+          let t = document.getElementById(key);
+          t.style.borderColor = 'initial';
+
+          let tfieldError = document.getElementById(`invalid-${key}`);
+          tfieldError.innerHTML = "";
+
+          if (value != "") {
+            t.setAttribute('aria-invalid', 'false');
+            formObj[key] = value;
+            return;
+          }
+
+          let errorString = "[Error]: TARGET is a required field.";
+          error.innerText = errorString;
+          t.style.borderColor = '#e72727';
+          t.setAttribute('aria-invalid', 'true');
+          tfieldError.innerHTML = errorString;
+        }
+
+        if (key === "action") {
+          formObj[key] = value;
+          return;
+        }
+
+        if (key === "TAG") {
+          tg.style.borderColor = enabled;
+
+          let tgfieldError = document.getElementById(`invalid-${key}`);
+          tgfieldError.innerHTML = "";
+
+          if (value != "") {
+            tg.setAttribute('aria-invalid', 'false');
+            formObj[key] = value;
+            return;
+          }
+
+          let errorString = "[Error]: TAG is a required field.";
+          error.innerText = errorString;
+          tg.style.borderColor = '#e72727';
+          tg.setAttribute('aria-invalid', 'true');
+          tgfieldError.innerHTML = errorString;
+        }
+
+        if (key === "key") {
+          k.style.borderColor = enabled;
+
+          let kfieldError = document.getElementById(`invalid-${key}`);
+          kfieldError.innerHTML = "";
+
+          if (value != "") {
+            k.setAttribute('aria-invalid', 'false');
+            formObj[key] = value;
+            return;
+          }
+
+          let errorString = "[Error]: key is a required field.";
+          error.innerText = errorString;
+          k.style.borderColor = '#e72727';
+          k.setAttribute('aria-invalid', 'true');
+          kfieldError.innerHTML = errorString;          
+        }
+
+        if (key === "value") {          
+          v.style.borderColor = enabled;
+
+          let vfieldError = document.getElementById(`invalid-${key}`);
+          vfieldError.innerHTML = "";
+
+          if (value != "") {
+            v.setAttribute('aria-invalid', 'false');
+            formObj[key] = value;
+            return;
+          }
+
+          let errorString = "[Error]: value is a required field.";
+          error.innerText = errorString;
+          v.style.borderColor = '#e72727';
+          v.setAttribute('aria-invalid', 'true');
+          vfieldError.innerHTML = errorString;
+        }
+
+        if (key === "pool/dataset") {
+          pd.style.borderColor = enabled;
+
+          let pdfieldError = document.getElementById(`invalid-${key}`);
+          pdfieldError.innerHTML = "";
+
+          if (value != "") {
+            pd.setAttribute('aria-invalid', 'false');
+            formObj[key] = value;
+            return;
+          }
+
+          let errorString = "[Error]: pool/dataset is a required field.";
+          error.innerText = errorString;
+          pd.style.borderColor = '#e72727';
+          pd.setAttribute('aria-invalid', 'true');
+          pdfieldError.innerHTML = errorString;          
+        }
+
+        if (key === "/jail/path") {
+          jp.style.borderColor = enabled;
+
+          let jpfieldError = document.getElementById(`invalid-${key}`);
+          jpfieldError.innerHTML = "";
+
+          if (value != "") {
+            jp.setAttribute('aria-invalid', 'false');
+            formObj[key] = value;
+            return;
+          }
+
+          let errorString = "[Error]: /jail/path is a required field.";
+          error.innerText = errorString;
+          jp.style.borderColor = '#e72727';
+          jp.setAttribute('aria-invalid', 'true');
+          jpfieldError.innerHTML = errorString;
+        }
+      });
+
+      if (error.innerText != "") { return; }
+
+      formObj['options'] = options.join(' ').trimEnd();
+      const formJson = JSON.stringify(formObj);
+      
+      result.innerText = 'send -> bastille ' + name;
+
+      let submitBtn = document.getElementById('submitBtn');
+      submitBtn.classList.add('loading');
+      submitBtn.innerHTML = '<span class="spinner"></span>';
+
+      const response = await sendHttpRequest(name, formJson);
+      if (response.code == 200) {
+        error.innerText = "";
+        result.innerText = response.data.msg;
+      } else {
+        result.innerText = "";
+        error.innerText = response.error;
+      }
+
+      submitBtn.classList.remove('loading');
+      submitBtn.innerHTML = 'Submit';
+    }
+  </script>
+{{end}}

@@ -43,6 +43,11 @@
   </div>
 
   <script>
+    console.log('[info]: Login page');
+
+    sessionStorage.removeItem('bw-actk');
+    sessionStorage.removeItem('bw-rftk');
+
     const html = document.querySelector('html');
     const themeBtn = document.getElementById('theme-toggle');
 
@@ -80,20 +85,7 @@
       const password = passwordInput.value;
       const bodyData = JSON.stringify({ username, password });
 
-      await sendRequest(bodyData);
-      
-      /*
-      setTimeout(() => {
-        if (username === "admin" && password === "123456abc") {
-          window.location.href = '/home';
-        } else {
-          submitBtn.setAttribute('aria-busy', 'false');
-          usernameInput.setAttribute('aria-invalid', 'true');
-          passwordInput.setAttribute('aria-invalid', 'true');
-          errorMsg.style.display = 'block';
-        }
-      }, 1200);
-      */      
+      await sendRequest(bodyData);      
     });
 
     async function sendRequest(bodyData) {
@@ -109,7 +101,7 @@
         credentials: "include"
       });
 
-      if (!response.ok) {    
+      if (!response.ok) {
         const error = await response.text();
         submitBtn.setAttribute('aria-busy', 'false');
         usernameInput.setAttribute('aria-invalid', 'true');
@@ -118,11 +110,15 @@
         errorMsg.style.display = 'block';
       }
       
-      await response.text();
+      const data = await response.json();
+      sessionStorage.setItem('bw_actk', data.bw_actk);
+      sessionStorage.setItem('bw_rftk', data.bw_rftk);
+
       submitBtn.setAttribute('aria-busy', 'false');
       usernameInput.setAttribute('aria-invalid', 'false');
       passwordInput.setAttribute('aria-invalid', 'false');
       errorMsg.innerText = "";
+
       window.location.href = '/home';
     }
   </script>

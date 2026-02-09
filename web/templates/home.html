@@ -148,7 +148,7 @@
     })();
     
     function redirectUrl() {
-      window.location.href = "http://{{.SysInfo.Ip}}:{{.SysInfo.Port}}/";
+      window.location.href = "http://{{.SysInfo.Ip}}:{{.SysInfo.Port}}/home";
     }
 
     function disableButtons() {
@@ -389,7 +389,8 @@
             'Access-Control-Allow-Origin': '*',
             'accept': 'application/json',
             'Content-Type': 'application/json',
-            'X-Request-ID': sessionStorage.getItem('id')
+            'X-Request-ID': sessionStorage.getItem('id'),
+            'Authorization': `Bearer ${sessionStorage.getItem('bw_actk')}`
           },
           body: JSON.stringify(bodyData),
           signal: controller.signal
@@ -435,7 +436,8 @@
             'access-control-allow-origin': '*',
             'accept': 'application/json',
             'Content-Type': 'application/json',
-            'X-Request-ID': sessionStorage.getItem('id')
+            'X-Request-ID': sessionStorage.getItem('id'),
+            'Authorization': `Bearer ${sessionStorage.getItem('bw_actk')}`
           },
           body: JSON.stringify(bodyData),
           signal: controller.signal

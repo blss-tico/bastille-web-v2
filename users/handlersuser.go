@@ -73,8 +73,8 @@ func (hu *HandlersUser) login(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(config.JwtKeyModel)
+	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	accessString, err := accessToken.SignedString(config.JwtKeyModel)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -96,7 +96,7 @@ func (hu *HandlersUser) login(w http.ResponseWriter, r *http.Request) {
 
 	accessCookie := &http.Cookie{
 		Name:     "bw-actk",
-		Value:    tokenString,
+		Value:    accessString,
 		Path:     "/",
 		Expires:  time.Now().Add(15 * time.Minute),
 		HttpOnly: true,
@@ -116,11 +116,11 @@ func (hu *HandlersUser) login(w http.ResponseWriter, r *http.Request) {
 
 	http.SetCookie(w, accessCookie)
 	http.SetCookie(w, refreshCookie)
-	w.Write([]byte("JWT set in HttpOnly cookie with SameSite=Strict"))
+	//w.Write([]byte("JWT set in HttpOnly cookie with SameSite=Strict"))
 
 	err = json.NewEncoder(w).Encode(map[string]string{
-		"access_token":  tokenString,
-		"refresh_token": refreshString,
+		"bw_actk": accessString,
+		"bw_rftk": refreshString,
 	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -129,7 +129,7 @@ func (hu *HandlersUser) login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (hu *HandlersUser) logout(w http.ResponseWriter, r *http.Request) {
-	log.Println("loginHandler")
+	log.Println("logoutHandler")
 
 	accessCookie := &http.Cookie{
 		Name:     "bw-actk",

@@ -65,7 +65,7 @@ func (ht *HandlersTemplates) home(w http.ResponseWriter, r *http.Request) {
 			Osrelease:       posinf[2],
 			Totalmemory:     pmminf[0],
 			BastilleVersion: bstv,
-			Ip:              config.BwAddrModel,
+			Ip:              config.AddrModel,
 			Port:            config.BwPortModel,
 		}
 	}

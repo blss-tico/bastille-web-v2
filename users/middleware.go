@@ -23,17 +23,19 @@ func loggingMiddleware(f http.HandlerFunc) http.HandlerFunc {
 
 func SessionAuthMiddleware(f http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		cookie, err := r.Cookie("access_token")
+		log.Println("SessionAuthMiddleware")
+
+		cookie, err := r.Cookie("bw-actk")
 		if err != nil {
 			if err == http.ErrNoCookie {
-				log.Println("No access_token cookie found")
+				log.Println("No bastille-web access token cookie found")
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 				return
 			} else {
 				log.Println("Error reading cookie:", err)
 			}
 		} else {
-			log.Println("Found access_token cookie:", cookie.Value)
+			log.Println("Found bastille-web access token cookie:", cookie.Value)
 			ctx := context.WithValue(r.Context(), "access_token", cookie.Value)
 			r = r.WithContext(ctx)
 		}
@@ -44,6 +46,8 @@ func SessionAuthMiddleware(f http.HandlerFunc) http.HandlerFunc {
 
 func ApiAuthMiddleware(f http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		log.Println("ApiAuthMiddleware")
+
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
 			http.Error(w, "Missing Authorization header", http.StatusUnauthorized)

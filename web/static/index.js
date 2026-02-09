@@ -40,9 +40,6 @@ function getCookie(name) {
 async function sendHttpRequest(url, bodyData) {
   console.log("[info]: sendHttpRequest ", url);
 
-  //let userToken = getCookie("access_token");
-  //console.log("userToken: ", userToken);
-
   const ipaddr = sessionStorage.getItem('ipaddr'); 
   const port = sessionStorage.getItem('port');
 
@@ -58,8 +55,7 @@ async function sendHttpRequest(url, bodyData) {
       'accept': 'application/json',
       'Content-Type': 'application/json',
       'X-Request-ID': sessionStorage.getItem('id'),
-      //'Authorization': 'Bearer ' + userToken, 
-      //'Cookie': 'access-token='+userToken
+      'Authorization': `Bearer ${sessionStorage.getItem('bw_actk')}`
     },
     body: bodyData,
     credentials: "include"

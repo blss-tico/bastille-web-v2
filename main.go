@@ -1,16 +1,16 @@
 package main
 
 import (
-	"log"
-	"net/http"
-
-	"github.com/rs/cors"
-
 	"bastille-web-v2/api"
 	"bastille-web-v2/bastille"
 	"bastille-web-v2/config"
 	"bastille-web-v2/users"
 	"bastille-web-v2/web"
+
+	"log"
+	"net/http"
+
+	"github.com/rs/cors"
 )
 
 func init() {

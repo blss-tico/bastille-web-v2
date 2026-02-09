@@ -10,6 +10,7 @@
       <ul>
         <li><button id="themeToggle" data-tooltip="change theme">🌙</button></li>
         <li><button id="notifToggle" data-tooltip="notifications">🔔</button></li>
+        <li><button id="logoutBtn" data-tooltip="logout" onclick="logout()">➜]</button></li>
         <li>
           <button id="sidebarToggle" class="sidebar-toggle" data-tooltip="menu">☰</button>
         </li>
@@ -80,6 +81,12 @@
       list.appendChild(newItem);
 
       setTimeout(() => bell.classList.toggle('blink'), 3000);
-    }    
+    }
+
+    function logout() {
+      sessionStorage.removeItem('bw-actk');
+      sessionStorage.removeItem('bw-rftk');
+      window.location.href = '/';
+    }
   </script>
 {{end}}

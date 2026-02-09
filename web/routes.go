@@ -9,13 +9,11 @@ import (
 
 type Routes struct {
 	Ht HandlersTemplates
-	Hu HandlersUser
 }
 
-func NewRoutes(ht HandlersTemplates, hu HandlersUser) *Routes {
+func NewRoutes(ht HandlersTemplates) *Routes {
 	return &Routes{
 		Ht: ht,
-		Hu: hu,
 	}
 }
 
@@ -84,37 +82,4 @@ func (r *Routes) TemplatesRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /upgrade", r.Ht.upgrade)
 	mux.HandleFunc("GET /verify", r.Ht.verify)
 	mux.HandleFunc("GET /zfs", r.Ht.zfs)
-}
-
-/*
-func (r *Routes) userRoutes(mux *http.ServeMux) {
-	log.Println("userRoutes")
-	mux.HandleFunc("POST /register", loggingMiddleware(r.hu.register))
-	mux.HandleFunc("POST /login", loggingMiddleware(r.hu.login))
-	mux.HandleFunc("POST /logout", authMiddleware(loggingMiddleware(r.hu.logout)))
-	mux.HandleFunc("POST /refresh", authMiddleware(loggingMiddleware(r.hu.refresh)))
-	mux.HandleFunc("GET /users", authMiddleware(loggingMiddleware(r.hu.getUsers)))
-	mux.HandleFunc("PUT /users/{id}", authMiddleware(loggingMiddleware(r.hu.updateUser)))
-	mux.HandleFunc("DELETE /users/{id}", authMiddleware(loggingMiddleware(r.hu.deleteUser)))
-}
-*/
-
-func (r *Routes) UserRoutes(mux *http.ServeMux) {
-	log.Println("userRoutes")
-
-	mux.HandleFunc("POST /register", loggingMiddleware(r.Hu.register))
-	mux.HandleFunc("POST /login", loggingMiddleware(r.Hu.login))
-
-	routes := map[string]http.HandlerFunc{
-		"POST /logout":       r.Hu.logout,
-		"POST /refresh":      r.Hu.refresh,
-		"GET /users":         r.Hu.getUsers,
-		"PUT /users/{id}":    r.Hu.updateUser,
-		"DELETE /users/{id}": r.Hu.deleteUser,
-	}
-
-	for path, handler := range routes {
-		cmd := loggingMiddleware(sessionAuthMiddleware(http.HandlerFunc(handler)))
-		http.Handle(path, cmd)
-	}
 }

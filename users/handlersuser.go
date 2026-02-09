@@ -1,7 +1,8 @@
-package web
+package users
 
 import (
 	"bastille-web-v2/config"
+
 	"encoding/json"
 	"fmt"
 	"log"
@@ -28,7 +29,7 @@ func (hu *HandlersUser) register(w http.ResponseWriter, r *http.Request) {
 	user.Password = hashedPassword
 	user.ID = len(config.BwUsers) + 1
 
-	err = config.RegisterUserToFile(user)
+	err = RegisterUserToFile(user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -94,7 +95,7 @@ func (hu *HandlersUser) login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	accessCookie := &http.Cookie{
-		Name:     "access_token",
+		Name:     "bw-actk",
 		Value:    tokenString,
 		Path:     "/",
 		Expires:  time.Now().Add(15 * time.Minute),
@@ -104,7 +105,7 @@ func (hu *HandlersUser) login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	refreshCookie := &http.Cookie{
-		Name:     "refresh_token",
+		Name:     "bw-rftk",
 		Value:    refreshString,
 		Path:     "/",
 		Expires:  time.Now().Add(7 * 24 * time.Hour),
@@ -117,23 +118,21 @@ func (hu *HandlersUser) login(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, refreshCookie)
 	w.Write([]byte("JWT set in HttpOnly cookie with SameSite=Strict"))
 
-	/*
-		err = json.NewEncoder(w).Encode(map[string]string{
-			"access_token":  tokenString,
-			"refresh_token": refreshString,
-		})
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-	*/
+	err = json.NewEncoder(w).Encode(map[string]string{
+		"access_token":  tokenString,
+		"refresh_token": refreshString,
+	})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func (hu *HandlersUser) logout(w http.ResponseWriter, r *http.Request) {
 	log.Println("loginHandler")
 
 	accessCookie := &http.Cookie{
-		Name:     "access_token",
+		Name:     "bw-actk",
 		Value:    "",
 		Path:     "/",
 		Expires:  time.Now(),
@@ -143,7 +142,7 @@ func (hu *HandlersUser) logout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	refreshCookie := &http.Cookie{
-		Name:     "refresh_token",
+		Name:     "bw-rftk",
 		Value:    "",
 		Path:     "/",
 		Expires:  time.Now(),
@@ -163,7 +162,7 @@ func (hu *HandlersUser) refresh(w http.ResponseWriter, r *http.Request) {
 	var req map[string]string
 	_ = json.NewDecoder(r.Body).Decode(&req)
 
-	refreshToken := req["refresh_token"]
+	refreshToken := req["bw-rftk"]
 	claims := &claimsModel{}
 
 	tkn, err := jwt.ParseWithClaims(refreshToken, claims, func(token *jwt.Token) (interface{}, error) {

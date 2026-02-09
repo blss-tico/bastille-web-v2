@@ -3,6 +3,7 @@ package config
 import (
 	"bastille-web-v2/bastille"
 	"bastille-web-v2/docs"
+
 	"encoding/json"
 	"log"
 	"os"

@@ -9,6 +9,7 @@ import (
 	"bastille-web-v2/api"
 	"bastille-web-v2/bastille"
 	"bastille-web-v2/config"
+	"bastille-web-v2/users"
 	"bastille-web-v2/web"
 )
 
@@ -36,11 +37,13 @@ func startHttpServer() {
 	apiRoutes.DataRoutes(mux)
 
 	handlerTemplates := &web.HandlersTemplates{Bl: *bastille}
-	handlerUsers := &web.HandlersUser{}
-	webRoutes := web.NewRoutes(*handlerTemplates, *handlerUsers)
+	webRoutes := web.NewRoutes(*handlerTemplates)
 	webRoutes.StaticRoutes(mux)
 	webRoutes.TemplatesRoutes(mux)
-	webRoutes.UserRoutes(mux)
+
+	handlerUsers := &users.HandlersUser{}
+	userRoutes := users.NewRoutes(*handlerUsers)
+	userRoutes.UserRoutes(mux)
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},

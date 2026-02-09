@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bastille-web-v2/users"
 	"log"
 	"net/http"
 
@@ -21,13 +22,13 @@ func (r *Routes) SwaggerRoutes(mux *http.ServeMux) {
 	log.Println("swaggerRoutes")
 	mux.Handle(
 		"GET /swagger/",
-		apiAuthMiddleware(loggingMiddleware(httpSwagger.Handler(httpSwagger.URL("/static/swagger.json")))),
+		users.ApiAuthMiddleware(loggingMiddleware(httpSwagger.Handler(httpSwagger.URL("/static/swagger.json")))),
 	)
 }
 
 func (r *Routes) DataRoutes(mux *http.ServeMux) {
 	log.Println("dataRoutes")
-	mux.HandleFunc("POST /bootstrap", apiAuthMiddleware(loggingMiddleware(r.Hd.bootstrap)))
+	mux.HandleFunc("POST /bootstrap", users.ApiAuthMiddleware(loggingMiddleware(r.Hd.bootstrap)))
 	mux.HandleFunc("POST /clone", loggingMiddleware(r.Hd.clone))
 	mux.HandleFunc("POST /cmd", loggingMiddleware(r.Hd.cmd))
 	mux.HandleFunc("POST /config", loggingMiddleware(r.Hd.config))

@@ -13,13 +13,10 @@ import (
 
 type HandlersUser struct{}
 
-var users = []userModel{}
-var userIDCounter = 1
-
 func (hu *HandlersUser) register(w http.ResponseWriter, r *http.Request) {
 	log.Println("registerHandler")
 
-	var user userModel
+	var user config.UsersModel
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -27,12 +24,16 @@ func (hu *HandlersUser) register(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	hashedPassword, _ := hashPasswordUtil(user.Password)
+	hashedPassword, _ := config.HashPasswordUtil(user.Password)
 	user.Password = hashedPassword
-	user.ID = userIDCounter
-	userIDCounter++
+	user.ID = len(config.BwUsers) + 1
 
-	users = append(users, user)
+	err = config.RegisterUserToFile(user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	err = json.NewEncoder(w).Encode(user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -43,7 +44,7 @@ func (hu *HandlersUser) register(w http.ResponseWriter, r *http.Request) {
 func (hu *HandlersUser) login(w http.ResponseWriter, r *http.Request) {
 	log.Println("loginHandler")
 
-	var creds userModel
+	var creds config.UsersModel
 	err := json.NewDecoder(r.Body).Decode(&creds)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -51,14 +52,14 @@ func (hu *HandlersUser) login(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	var storedUser userModel
-	for _, u := range users {
+	var storedUser config.UsersModel
+	for _, u := range config.BwUsers {
 		if u.Username == creds.Username {
 			storedUser = u
 		}
 	}
 
-	if storedUser.Username == "" || !checkPasswordHashUtil(creds.Password, storedUser.Password) {
+	if storedUser.Username == "" || !config.CheckPasswordHashUtil(creds.Password, storedUser.Password) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -186,24 +187,24 @@ func (hu *HandlersUser) refresh(w http.ResponseWriter, r *http.Request) {
 
 func (hu *HandlersUser) getUsers(w http.ResponseWriter, r *http.Request) {
 	log.Println("getUsersHandler")
-	json.NewEncoder(w).Encode(users)
+	json.NewEncoder(w).Encode(config.BwUsers)
 }
 
 func (hu *HandlersUser) updateUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("updateUserHandler")
 
 	id := r.PathValue("id")
-	var updated userModel
+	var updated config.UsersModel
 	_ = json.NewDecoder(r.Body).Decode(&updated)
 
-	for i, u := range users {
+	for i, u := range config.BwUsers {
 		if fmt.Sprintf("%d", u.ID) == id {
-			users[i].Username = updated.Username
+			config.BwUsers[i].Username = updated.Username
 			if updated.Password != "" {
-				hashed, _ := hashPasswordUtil(updated.Password)
-				users[i].Password = hashed
+				hashed, _ := config.HashPasswordUtil(updated.Password)
+				config.BwUsers[i].Password = hashed
 			}
-			json.NewEncoder(w).Encode(users[i])
+			json.NewEncoder(w).Encode(config.BwUsers[i])
 			return
 		}
 	}
@@ -214,9 +215,9 @@ func (hu *HandlersUser) deleteUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("deleteUserHandler")
 
 	id := r.PathValue("id")
-	for i, u := range users {
+	for i, u := range config.BwUsers {
 		if fmt.Sprintf("%d", u.ID) == id {
-			users = append(users[:i], users[i+1:]...)
+			config.BwUsers = append(config.BwUsers[:i], config.BwUsers[i+1:]...)
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}

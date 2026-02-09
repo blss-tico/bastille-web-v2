@@ -11,9 +11,9 @@ var RefreshKeyModel []byte
 var NodesListModel []NodesModel
 
 type UsersModel struct {
-	Id       int
-	Username string
-	Password string
+	ID       int    `json:"id,omitempty" example:"1" format:"string"`
+	Username string `json:"username" example:"user" format:"string"`
+	Password string `json:"password" example:"secretpassword" format:"string"`
 }
 
 type BastilleOptionsModel struct {

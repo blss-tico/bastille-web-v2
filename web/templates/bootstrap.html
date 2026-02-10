@@ -9,7 +9,7 @@
           <fieldset>
             {{range .Fields}}
               <input type="text" placeholder="{{.}}" name="{{.}}" id="{{.}}" class="input-text" aria-describedby="invalid-{{.}}" />
-              <small id="invalid-{{.}}"></small>          
+              <small id="invalid-{{.}}"></small>
             {{end}}
           </fieldset>
           <fieldset>
@@ -70,7 +70,7 @@
 
       const ipaddr = sessionStorage.getItem('ipaddr');
       const port = sessionStorage.getItem('port');
-      window.location.href = `http://${ipaddr}:${port}/`;
+      window.location.href = `http://${ipaddr}:${port}/home`;
     }
 
     async function bootstrapSubmit(event) {

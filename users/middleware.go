@@ -35,7 +35,7 @@ func SessionAuthMiddleware(f http.HandlerFunc) http.HandlerFunc {
 				log.Println("Error reading cookie:", err)
 			}
 		} else {
-			log.Println("Found bastille-web access token cookie:", cookie.Value)
+			log.Println("Found bastille-web access token cookie:")
 			ctx := context.WithValue(r.Context(), "access_token", cookie.Value)
 			r = r.WithContext(ctx)
 		}

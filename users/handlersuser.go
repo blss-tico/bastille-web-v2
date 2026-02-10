@@ -192,12 +192,12 @@ func (hu *HandlersUser) getUsers(w http.ResponseWriter, r *http.Request) {
 func (hu *HandlersUser) updateUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("updateUserHandler")
 
-	id := r.PathValue("id")
+	username := r.PathValue("username")
 	var updated config.UsersModel
 	_ = json.NewDecoder(r.Body).Decode(&updated)
 
 	for i, u := range config.BwUsers {
-		if fmt.Sprintf("%d", u.ID) == id {
+		if fmt.Sprintf("%s", u.Username) == username {
 			config.BwUsers[i].Username = updated.Username
 			if updated.Password != "" {
 				hashed, _ := config.HashPasswordUtil(updated.Password)
@@ -213,9 +213,9 @@ func (hu *HandlersUser) updateUser(w http.ResponseWriter, r *http.Request) {
 func (hu *HandlersUser) deleteUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("deleteUserHandler")
 
-	id := r.PathValue("id")
+	username := r.PathValue("username")
 	for i, u := range config.BwUsers {
-		if fmt.Sprintf("%d", u.ID) == id {
+		if fmt.Sprintf("%s", u.ID) == username {
 			config.BwUsers = append(config.BwUsers[:i], config.BwUsers[i+1:]...)
 			w.WriteHeader(http.StatusNoContent)
 			return

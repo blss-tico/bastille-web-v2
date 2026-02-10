@@ -1,0 +1,212 @@
+{{define "content"}}
+  <div class="card">
+    <header>Users</header>
+    <br>
+    <form id="user-form" class="card-form">
+      <fieldset>
+        <input type="text" placeholder="username" name="username" id="username" class="input-text" aria-describedby="invalid-username" />
+        <small id="invalid-username"></small>
+        <input type="password" placeholder="password" name="password" id="password" class="input-text" aria-describedby="invalid-password" />
+        <small id="invalid-password"></small>
+        <fieldset>
+          <label for="action">
+            <input type="radio" id="create-user" name="action" value="create-user" onchange="handleRadioBtn(this)" />
+            create
+          </label>
+          <label for="action">
+            <input type="radio" id="update-user" name="action" value="update-user" onchange="handleRadioBtn(this)" />
+            update
+          </label>
+          <label for="action">
+            <input type="radio" id="delete-user" name="action" value="delete-user" onchange="handleRadioBtn(this)" />
+            delete
+          </label>
+        </fieldset>
+      </fieldset>
+      <div class="grid">
+        <button id="submitBtn" class="secondary btn-card-submit" onclick="userSubmit(event)">Submit</button>
+        <button class="primary btn-card-help" onclick="clearUser(event)">Clear</button>
+        <button class="outline contrast" onclick="backToHome(event)">Home</button>
+      </div>
+    </form>
+    <div class="card-results">
+      <p id="userResult" class="card-result"></p>
+      <p id="userError" class="card-error"></p>
+    </div>
+  </div>
+  <hr>
+  <div class="card">
+    <header>Nodes</header>
+    <br>
+    <form id="node-form" class="card-form">
+      <fieldset>
+        <input type="text" placeholder="nodename" name="nodename" id="nodename" class="input-text" aria-describedby="invalid-nodename" />
+        <small id="invalid-nodename"></small>
+        <input type="text" placeholder="nodeip" name="nodeip" id="nodeip" class="input-text" aria-describedby="invalid-nodeip" />
+        <small id="invalid-nodeip"></small>
+        <input type="text" placeholder="nodeport" name="nodeport" id="nodeport" class="input-text" aria-describedby="invalid-nodeport" />
+        <small id="invalid-nodeport"></small>
+      </fieldset>
+      <div class="grid">
+        <button id="submitNodeBtn" class="secondary btn-card-submit" onclick="nodeSubmit(event)">Submit</button>
+        <button class="primary btn-card-help" onclick="nodeClear(event)">Clear</button>
+        <button class="outline contrast" onclick="backToHome(event)">Home</button>
+      </div>
+    </form>
+    <div class="card-results">
+      <p id="nodeResult" class="card-result"></p>
+      <p id="nodeError" class="card-error"></p>
+    </div>
+  </div>
+
+  <script>
+    function handleRadioBtn(radio) {
+      if (radio.value !== '') { return; }
+    }
+
+    function backToHome(event) {
+      event.preventDefault();
+      const ipaddr = sessionStorage.getItem('ipaddr');
+      const port = sessionStorage.getItem('port');
+      window.location.href = `http://${ipaddr}:${port}/home`;
+    }
+
+    async function userSubmit(event) {
+      event.preventDefault();
+
+      const result = document.getElementById('userResult');
+      const error = document.getElementById('userError');
+      result.innerText = "";
+      error.innerText = ""; 
+
+      const form = document.getElementById('user-form');
+      const formData = new FormData(form);
+      let actions = [];
+      let formObj = {};
+      let url;
+      let method;
+      formData.forEach((value, key) => {
+        if (key == "action") {
+          formObj[key] = value;
+          
+          switch(value) {
+            case 'create-user': 
+              url = 'register';
+              method = 'POST';
+              break;
+            case 'update-user': 
+              url = 'users/';
+              method = 'PUT';
+              break;
+            case 'delete-user': 
+              url = 'users/';
+              method = 'DELETE';
+              break;
+          }
+
+          return;
+        }
+
+        value = value.trim();
+
+        if (key == "username") {
+          let u = document.getElementById(key);
+          u.style.borderColor = 'initial';
+
+          let ufieldError = document.getElementById(`invalid-${key}`);
+          ufieldError.innerHTML = "";
+
+          if (value != "") {
+            u.setAttribute('aria-invalid', 'false');
+            formObj[key] = value;
+            if (url !== 'register') { url += value; }
+            return;
+          }
+
+          let errorString = "[Error]: username is a required field";
+          error.innerText = errorString;
+          u.style.borderColor = '#e72727';
+          u.setAttribute('aria-invalid', 'true');
+          ufieldError.innerHTML = errorString;
+        }
+
+        if (key == "password") {
+          let p = document.getElementById(key);
+          p.style.borderColor = 'initial';
+
+          let pfieldError = document.getElementById(`invalid-${key}`);
+          pfieldError.innerHTML = "";
+
+          if (value != "") {
+            p.setAttribute('aria-invalid', 'false');
+            formObj[key] = value;
+            return;
+          }
+
+          let errorString = "[Error]: password is a required field";
+          error.innerText = errorString;
+          p.style.borderColor = '#e72727';
+          p.setAttribute('aria-invalid', 'true');
+          pfieldError.innerHTML = errorString;
+        }
+      });
+      
+      const formJson = JSON.stringify(formObj);
+      console.log(formJson, url, method);
+      return;
+
+      result.innerText = 'send -> ';
+
+      let submitBtn = document.getElementById('submitBtn');
+      submitBtn.classList.add('loading');
+      submitBtn.innerHTML = '<span class="spinner"></span>';
+
+      const response = await httpRequest(url, method, formJson);
+      if (response.code == 200) {
+        error.innerText = "";
+        result.innerText = response.data.msg;
+      } else {
+        result.innerText = "";
+        error.innerText = response.error;
+      }
+
+      submitBtn.classList.remove('loading');
+      submitBtn.innerHTML = 'Submit';
+    }
+
+    async function httpRequest(url, method, bodyData) {
+      console.log("[info]: httpRequest ", url);
+
+      const ipaddr = sessionStorage.getItem('ipaddr'); 
+      const port = sessionStorage.getItem('port');
+
+      if (!ipaddr) { return { code: 500, error: 'ip address node missing' }; }
+      if (!port) { return { code: 500, error: 'port node missing' }; }
+      
+      console.log('sendHttpRequest: ', ipaddr, port);
+      const response = await fetch(`http://${ipaddr}:${port}/` + url, {
+        method: method,
+        credentials: "include",
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+          'X-Request-ID': sessionStorage.getItem('id'),
+          'Authorization': `Bearer ${sessionStorage.getItem('bw_actk')}`
+        },
+        body: bodyData,
+        credentials: "include"
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        console.log("[error]: ", error);
+        document.dispatchEvent(notifEventIndex(`Error ${response.status} - ${error.message || error}`));
+        return { code: response.status, error: error };
+      }
+      
+      const responseData = await response.json();
+      return { code: response.status, data: responseData };
+    }
+  </script>
+{{end}}

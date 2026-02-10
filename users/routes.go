@@ -20,17 +20,9 @@ func (r *Routes) UserRoutes(mux *http.ServeMux) {
 
 	mux.HandleFunc("POST /register", loggingMiddleware(r.Hu.register))
 	mux.HandleFunc("POST /login", loggingMiddleware(r.Hu.login))
-
-	routes := map[string]http.HandlerFunc{
-		"POST /logout":       r.Hu.logout,
-		"POST /refresh":      r.Hu.refresh,
-		"GET /users":         r.Hu.getUsers,
-		"PUT /users/{id}":    r.Hu.updateUser,
-		"DELETE /users/{id}": r.Hu.deleteUser,
-	}
-
-	for path, handler := range routes {
-		cmd := loggingMiddleware(SessionAuthMiddleware(http.HandlerFunc(handler)))
-		http.Handle(path, cmd)
-	}
+	mux.HandleFunc("POST /logout", loggingMiddleware(SessionAuthMiddleware(r.Hu.logout)))
+	mux.HandleFunc("POST /refresh", loggingMiddleware(SessionAuthMiddleware(r.Hu.refresh)))
+	mux.HandleFunc("GET /users", loggingMiddleware(SessionAuthMiddleware(r.Hu.getUsers)))
+	mux.HandleFunc("PUT /users/{username}", loggingMiddleware(SessionAuthMiddleware(r.Hu.updateUser)))
+	mux.HandleFunc("DELETE /users/{username}", loggingMiddleware(SessionAuthMiddleware(r.Hu.deleteUser)))
 }

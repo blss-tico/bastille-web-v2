@@ -103,6 +103,14 @@
       if (check.checked && (check.value === '-v' || check.value === '--vlan')) { v.disabled = false; }
     }
 
+    function backToHome(event) {
+      event.preventDefault();
+
+      const ipaddr = sessionStorage.getItem('ipaddr');
+      const port = sessionStorage.getItem('port');
+      window.location.href = `http://${ipaddr}:${port}/home`;
+    }
+
     async function networkSubmit(event) {
       event.preventDefault();
 

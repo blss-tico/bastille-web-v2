@@ -210,7 +210,13 @@
       const id = setTimeout(() => controller.abort(), timeout);
 
       try {
-        const response = await fetch(`http://${ipAddr}:${port}/node`, {      
+        const response = await fetch(`http://${ipAddr}:${port}/node`, {
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'accept': 'application/json',
+            'X-Request-ID': sessionStorage.getItem('id'),
+            'Authorization': `Bearer ${sessionStorage.getItem('bw_actk')}`
+          },
           signal: controller.signal
         });
         
@@ -262,7 +268,8 @@
           headers: {
             'Access-Control-Allow-Origin': '*',
             'Content-Type': 'application/json',
-            'X-Request-ID': sessionStorage.getItem('id')
+            'X-Request-ID': sessionStorage.getItem('id'),
+            'Authorization': `Bearer ${sessionStorage.getItem('bw_actk')}`
           },
           body: JSON.stringify(bodyData),
           signal: controller.signal
@@ -464,6 +471,7 @@
     }
 
     // charts logic
+    /*
     setTimeout(() => {
       console.log('[info]: charts loaded');
 
@@ -493,5 +501,6 @@
         }
       });
     }, 500);
+    */
   </script>
 {{end}}

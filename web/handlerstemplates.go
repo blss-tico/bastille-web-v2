@@ -164,6 +164,12 @@ func (ht *HandlersTemplates) home(w http.ResponseWriter, r *http.Request) {
 	renderTemplateUtil(w, "home.html", data)
 }
 
+func (ht *HandlersTemplates) configuration(w http.ResponseWriter, r *http.Request) {
+	log.Println("configurationHandlersTemplates")
+	data := templatesModel{CommandName: "configuration", Data: config.BastilleM}
+	renderTemplateUtil(w, "configuration.html", data)
+}
+
 func (ht *HandlersTemplates) help(w http.ResponseWriter, r *http.Request) {
 	log.Println("helpHandlersTemplates")
 	data := templatesModel{CommandName: "help", Data: config.BastilleM}

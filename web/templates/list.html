@@ -24,7 +24,7 @@
                       <input type="radio" id="{{.}}" name="action" value="{{.}}" onchange="handleRadioBtn(this)" />
                       {{.}}
                     </label>
-                  </fieldset>                
+                  </fieldset>
                 {{end}}
               {{end}}
             </div>
@@ -93,7 +93,7 @@
 
       const ipaddr = sessionStorage.getItem('ipaddr');
       const port = sessionStorage.getItem('port');
-      window.location.href = `http://${ipaddr}:${port}/`;
+      window.location.href = `http://${ipaddr}:${port}/home`;
     }
 
     async function listSubmit(event) {

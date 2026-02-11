@@ -2,6 +2,7 @@ package users
 
 import (
 	"bastille-web-v2/config"
+	"crypto/rand"
 
 	"encoding/json"
 	"fmt"
@@ -10,6 +11,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/oklog/ulid/v2"
 )
 
 type HandlersUser struct{}
@@ -25,9 +27,16 @@ func (hu *HandlersUser) register(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	if user.Username == "admin" {
+		http.Error(w, "error: user admin cannot be created", http.StatusInternalServerError)
+		return
+	}
+
 	hashedPassword, _ := config.HashPasswordUtil(user.Password)
 	user.Password = hashedPassword
-	user.ID = len(config.BwUsers) + 1
+	entropy := ulid.Monotonic(rand.Reader, 0)
+	id := ulid.MustNew(ulid.Timestamp(time.Now()), entropy)
+	user.ID = id.String()
 
 	err = RegisterUserToFile(user)
 	if err != nil {
@@ -35,7 +44,13 @@ func (hu *HandlersUser) register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = json.NewEncoder(w).Encode(user)
+	type User struct {
+		Id string `json:"id"`
+	}
+
+	cUser := User{Id: id.String()}
+	w.WriteHeader(http.StatusCreated)
+	err = json.NewEncoder(w).Encode(cUser)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -53,19 +68,13 @@ func (hu *HandlersUser) login(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	var storedUser config.UsersModel
-	for _, u := range config.BwUsers {
-		if u.Username == creds.Username {
-			storedUser = u
-		}
-	}
-
-	if storedUser.Username == "" || !config.CheckPasswordHashUtil(creds.Password, storedUser.Password) {
-		w.WriteHeader(http.StatusUnauthorized)
+	err = LoadUserFromFile(creds)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	expirationTime := time.Now().Add(15 * time.Minute)
+	expirationTime := time.Now().Add(1 * time.Minute)
 	claims := &claimsModel{
 		Username: creds.Username,
 		StandardClaims: jwt.StandardClaims{
@@ -98,7 +107,7 @@ func (hu *HandlersUser) login(w http.ResponseWriter, r *http.Request) {
 		Name:     "bw-actk",
 		Value:    accessString,
 		Path:     "/",
-		Expires:  time.Now().Add(15 * time.Minute),
+		Expires:  time.Now().Add(1 * time.Minute),
 		HttpOnly: true,
 		Secure:   false,
 		SameSite: http.SameSiteStrictMode,
@@ -116,7 +125,6 @@ func (hu *HandlersUser) login(w http.ResponseWriter, r *http.Request) {
 
 	http.SetCookie(w, accessCookie)
 	http.SetCookie(w, refreshCookie)
-	//w.Write([]byte("JWT set in HttpOnly cookie with SameSite=Strict"))
 
 	err = json.NewEncoder(w).Encode(map[string]string{
 		"bw_actk": accessString,
@@ -153,35 +161,88 @@ func (hu *HandlersUser) logout(w http.ResponseWriter, r *http.Request) {
 
 	http.SetCookie(w, accessCookie)
 	http.SetCookie(w, refreshCookie)
-	w.Write([]byte("Logout"))
+
+	err := json.NewEncoder(w).Encode(map[string]string{
+		"bw_actk": "",
+		"bw_rftk": "",
+	})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
-func (hu *HandlersUser) refresh(w http.ResponseWriter, r *http.Request) {
-	log.Println("refreshHandler")
+func (hu *HandlersUser) refreshTkApi(w http.ResponseWriter, r *http.Request) {
+	log.Println("refreshTkApiHandler")
 
 	var req map[string]string
-	_ = json.NewDecoder(r.Body).Decode(&req)
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-	refreshToken := req["bw-rftk"]
+	refreshToken := req["bw_rftk"]
 	claims := &claimsModel{}
-
 	tkn, err := jwt.ParseWithClaims(refreshToken, claims, func(token *jwt.Token) (interface{}, error) {
 		return config.RefreshKeyModel, nil
 	})
-
 	if err != nil || !tkn.Valid {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
-	expirationTime := time.Now().Add(15 * time.Minute)
+	expirationTime := time.Now().Add(1 * time.Minute)
 	claims.ExpiresAt = expirationTime.Unix()
 	newToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, _ := newToken.SignedString(config.JwtKeyModel)
+	accessString, _ := newToken.SignedString(config.JwtKeyModel)
 
 	json.NewEncoder(w).Encode(map[string]string{
-		"access_token": tokenString,
+		"bw_actk": accessString,
 	})
+}
+
+func (hu *HandlersUser) refreshCkTpt(w http.ResponseWriter, r *http.Request) {
+	log.Println("refreshCkTptHandler")
+
+	cookie, err := r.Cookie("bw-rftk")
+	if err != nil {
+		if err == http.ErrNoCookie {
+			log.Println("No bastille-web refresh token cookie found")
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
+		} else {
+			log.Println("Error reading refesh cookie:", err)
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
+	}
+
+	claims := &claimsModel{}
+	tkn, err := jwt.ParseWithClaims(cookie.Value, claims, func(token *jwt.Token) (interface{}, error) {
+		return config.RefreshKeyModel, nil
+	})
+	if err != nil || !tkn.Valid {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	expirationTime := time.Now().Add(1 * time.Minute)
+	claims.ExpiresAt = expirationTime.Unix()
+	newToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	accessString, _ := newToken.SignedString(config.JwtKeyModel)
+
+	accessCookie := &http.Cookie{
+		Name:     "bw-actk",
+		Value:    accessString,
+		Path:     "/",
+		Expires:  time.Now().Add(1 * time.Minute),
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteStrictMode,
+	}
+
+	http.SetCookie(w, accessCookie)
 }
 
 func (hu *HandlersUser) getUsers(w http.ResponseWriter, r *http.Request) {
@@ -194,20 +255,19 @@ func (hu *HandlersUser) updateUser(w http.ResponseWriter, r *http.Request) {
 
 	username := r.PathValue("username")
 	var updated config.UsersModel
-	_ = json.NewDecoder(r.Body).Decode(&updated)
-
-	for i, u := range config.BwUsers {
-		if fmt.Sprintf("%s", u.Username) == username {
-			config.BwUsers[i].Username = updated.Username
-			if updated.Password != "" {
-				hashed, _ := config.HashPasswordUtil(updated.Password)
-				config.BwUsers[i].Password = hashed
-			}
-			json.NewEncoder(w).Encode(config.BwUsers[i])
-			return
-		}
+	err := json.NewDecoder(r.Body).Decode(&updated)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
-	w.WriteHeader(http.StatusNotFound)
+
+	err = UpdateUserToFile(username, updated)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (hu *HandlersUser) deleteUser(w http.ResponseWriter, r *http.Request) {
@@ -215,7 +275,7 @@ func (hu *HandlersUser) deleteUser(w http.ResponseWriter, r *http.Request) {
 
 	username := r.PathValue("username")
 	for i, u := range config.BwUsers {
-		if fmt.Sprintf("%s", u.ID) == username {
+		if fmt.Sprintf("%s", u.Username) == username {
 			config.BwUsers = append(config.BwUsers[:i], config.BwUsers[i+1:]...)
 			w.WriteHeader(http.StatusNoContent)
 			return

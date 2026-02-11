@@ -38,21 +38,24 @@
   <div class="card">
     <header>Nodes</header>
     <br>
-    <form id="node-form" class="card-form">
-      <fieldset>
-        <input type="text" placeholder="nodename" name="nodename" id="nodename" class="input-text" aria-describedby="invalid-nodename" />
-        <small id="invalid-nodename"></small>
-        <input type="text" placeholder="nodeip" name="nodeip" id="nodeip" class="input-text" aria-describedby="invalid-nodeip" />
-        <small id="invalid-nodeip"></small>
-        <input type="text" placeholder="nodeport" name="nodeport" id="nodeport" class="input-text" aria-describedby="invalid-nodeport" />
-        <small id="invalid-nodeport"></small>
-      </fieldset>
-      <div class="grid">
-        <button id="submitNodeBtn" class="secondary btn-card-submit" onclick="nodeSubmit(event)">Submit</button>
-        <button class="primary btn-card-help" onclick="nodeClear(event)">Clear</button>
-        <button class="outline contrast" onclick="backToHome(event)">Home</button>
-      </div>
-    </form>
+    <div>
+      <form id="node-form" class="card-form">
+        <fieldset>
+          <input type="text" placeholder="nodename" name="nodename" id="nodename" class="input-text" aria-describedby="invalid-nodename" />
+          <small id="invalid-nodename"></small>
+          <input type="text" placeholder="nodeip" name="nodeip" id="nodeip" class="input-text" aria-describedby="invalid-nodeip" />
+          <small id="invalid-nodeip"></small>
+          <input type="text" placeholder="nodeport" name="nodeport" id="nodeport" class="input-text" aria-describedby="invalid-nodeport" />
+          <small id="invalid-nodeport"></small>
+        </fieldset>
+        <div class="grid">
+          <button id="submitNodeBtn" class="secondary btn-card-submit" onclick="nodeSubmit(event)">Submit</button>
+          <button class="primary btn-card-help" onclick="nodeClear(event)">Clear</button>
+          <button class="outline contrast" onclick="backToHome(event)">Home</button>
+        </div>
+      </form>
+    </div>
+    <br><br>
     <div class="card-results">
       <p id="nodeResult" class="card-result"></p>
       <p id="nodeError" class="card-error"></p>
@@ -60,8 +63,37 @@
   </div>
 
   <script>
+    let url = "";
+    let method = "";
+
+    let cr = document.getElementById('create-user');
+    let up = document.getElementById('update-user');
+    let dl = document.getElementById('delete-user');
+
     function handleRadioBtn(radio) {
-      if (radio.value !== '') { return; }
+      cr.setAttribute('aria-invalid', 'false');
+      up.setAttribute('aria-invalid', 'false');
+      dl.setAttribute('aria-invalid', 'false');
+
+      switch(radio.value) {
+        case 'create-user': 
+          url = 'register';
+          method = 'POST';
+          break;
+        case 'update-user': 
+          url = 'users/';
+          method = 'PUT';
+          break;
+        case 'delete-user': 
+          url = 'users/';
+          method = 'DELETE';
+          let p = document.getElementById('password');
+          p.disabled = true;
+          break;
+        default:
+          url = "";
+          method = "";
+      }
     }
 
     function backToHome(event) {
@@ -70,10 +102,10 @@
       const port = sessionStorage.getItem('port');
       window.location.href = `http://${ipaddr}:${port}/home`;
     }
-
+    
     async function userSubmit(event) {
       event.preventDefault();
-
+      
       const result = document.getElementById('userResult');
       const error = document.getElementById('userError');
       result.innerText = "";
@@ -83,27 +115,9 @@
       const formData = new FormData(form);
       let actions = [];
       let formObj = {};
-      let url;
-      let method;
       formData.forEach((value, key) => {
         if (key == "action") {
           formObj[key] = value;
-          
-          switch(value) {
-            case 'create-user': 
-              url = 'register';
-              method = 'POST';
-              break;
-            case 'update-user': 
-              url = 'users/';
-              method = 'PUT';
-              break;
-            case 'delete-user': 
-              url = 'users/';
-              method = 'DELETE';
-              break;
-          }
-
           return;
         }
 
@@ -150,11 +164,18 @@
           pfieldError.innerHTML = errorString;
         }
       });
-      
-      const formJson = JSON.stringify(formObj);
-      console.log(formJson, url, method);
-      return;
 
+      if (error.innerText != "") { return; }
+      
+      if (!formObj.action) {
+        cr.setAttribute('aria-invalid', 'true');
+        up.setAttribute('aria-invalid', 'true');
+        dl.setAttribute('aria-invalid', 'true');
+        return;
+      }
+
+      const formJson = JSON.stringify(formObj);
+      
       result.innerText = 'send -> ';
 
       let submitBtn = document.getElementById('submitBtn');
@@ -162,9 +183,9 @@
       submitBtn.innerHTML = '<span class="spinner"></span>';
 
       const response = await httpRequest(url, method, formJson);
-      if (response.code == 200) {
+      if (response.code === 200 || response.code === 204) {
         error.innerText = "";
-        result.innerText = response.data.msg;
+        result.innerText = response.data;
       } else {
         result.innerText = "";
         error.innerText = response.error;
@@ -175,7 +196,7 @@
     }
 
     async function httpRequest(url, method, bodyData) {
-      console.log("[info]: httpRequest ", url);
+      console.log("[info]: httpRequest ", url, method);
 
       const ipaddr = sessionStorage.getItem('ipaddr'); 
       const port = sessionStorage.getItem('port');
@@ -183,10 +204,8 @@
       if (!ipaddr) { return { code: 500, error: 'ip address node missing' }; }
       if (!port) { return { code: 500, error: 'port node missing' }; }
       
-      console.log('sendHttpRequest: ', ipaddr, port);
       const response = await fetch(`http://${ipaddr}:${port}/` + url, {
         method: method,
-        credentials: "include",
         headers: {
           'Access-Control-Allow-Origin': '*',
           'accept': 'application/json',
@@ -197,6 +216,54 @@
         body: bodyData,
         credentials: "include"
       });
+
+      if (response.status === 401) { 
+        const refreshRes = await fetch(`http://${ipaddr}:${port}/refresh`, { 
+          method: "POST",
+          body: JSON.stringify({ bw_rftk: sessionStorage.getItem('bw_rftk') }),
+          credentials: "include" 
+        }); 
+        
+        if (refreshRes.ok) { 
+          const data = await refreshRes.json();
+          sessionStorage.setItem("bw_actk", data.bw_actk); 
+          
+          response = await fetch(`http://${ipaddr}:${port}/` + url, {
+            method: method,
+            headers: {
+              'Access-Control-Allow-Origin': '*',
+              'accept': 'application/json',
+              'Content-Type': 'application/json',
+              'X-Request-ID': sessionStorage.getItem('id'),
+              'Authorization': `Bearer ${sessionStorage.getItem('bw_actk')}`
+            },
+            body: bodyData,
+            credentials: "include"
+          }); 
+        }
+      }
+
+      switch (method) {
+        case 'PUT':
+          if (response.status !== 204) {
+            const error = 'Failed to update user';
+            console.log("[error]: ", error);
+            document.dispatchEvent(notifEventIndex(`Error ${response.status} - ${error}`));
+            return { code: response.status, error: error };
+          }
+          
+          return { code: response.status, data: "User updated" };
+
+        case 'DELETE':
+          if (response.status !== 204) {
+            const error = 'Failed to delete user';
+            console.log("[error]: ", error);
+            document.dispatchEvent(notifEventIndex(`Error ${response.status} - ${error}`));
+            return { code: response.status, error: error };
+          }
+          
+          return { code: response.status, data: "User deleted" };
+      }
 
       if (!response.ok) {
         const error = await response.text();

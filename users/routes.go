@@ -20,8 +20,9 @@ func (r *Routes) UserRoutes(mux *http.ServeMux) {
 
 	mux.HandleFunc("POST /register", loggingMiddleware(r.Hu.register))
 	mux.HandleFunc("POST /login", loggingMiddleware(r.Hu.login))
+	mux.HandleFunc("POST /refresh", loggingMiddleware(r.Hu.refreshTkApi))
+	mux.HandleFunc("POST /refreshtpt", loggingMiddleware(r.Hu.refreshCkTpt))
 	mux.HandleFunc("POST /logout", loggingMiddleware(SessionAuthMiddleware(r.Hu.logout)))
-	mux.HandleFunc("POST /refresh", loggingMiddleware(SessionAuthMiddleware(r.Hu.refresh)))
 	mux.HandleFunc("GET /users", loggingMiddleware(SessionAuthMiddleware(r.Hu.getUsers)))
 	mux.HandleFunc("PUT /users/{username}", loggingMiddleware(SessionAuthMiddleware(r.Hu.updateUser)))
 	mux.HandleFunc("DELETE /users/{username}", loggingMiddleware(SessionAuthMiddleware(r.Hu.deleteUser)))

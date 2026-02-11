@@ -9,10 +9,12 @@ window.onload = () => {
   const uuidFmt = uuidv7StringFormat(uuidStr);
   sessionStorage.setItem('id', uuidFmt);
 
+  /*
   setTimeout(async () => { 
     await loadAllJailsIndex(); 
     document.dispatchEvent(notifEventIndex("Jails loaded"));
   }, 500);
+  */
 }
 
 function notifEventIndex(message) {
@@ -46,10 +48,8 @@ async function sendHttpRequest(url, bodyData) {
   if (!ipaddr) { return { code: 500, error: 'ip address node missing' }; }
   if (!port) { return { code: 500, error: 'port node missing' }; }
   
-  console.log('sendHttpRequest: ', ipaddr, port);
-  const response = await fetch(`http://${ipaddr}:${port}/` + url, {
+  let response = await fetch(`http://${ipaddr}:${port}/` + url, {
     method: 'POST',
-    credentials: "include",
     headers: {
       'Access-Control-Allow-Origin': '*',
       'accept': 'application/json',
@@ -60,6 +60,32 @@ async function sendHttpRequest(url, bodyData) {
     body: bodyData,
     credentials: "include"
   });
+
+  if (response.status === 401) { 
+    const refreshRes = await fetch(`http://${ipaddr}:${port}/refresh`, { 
+      method: "POST",
+      body: JSON.stringify({ bw_rftk: sessionStorage.getItem('bw_rftk') }),
+      credentials: "include" 
+    }); 
+    
+    if (refreshRes.ok) { 
+      const data = await refreshRes.json();
+      sessionStorage.setItem("bw_actk", data.bw_actk); 
+       
+      response = await fetch(`http://${ipaddr}:${port}/` + url, {
+        method: 'POST',
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+          'X-Request-ID': sessionStorage.getItem('id'),
+          'Authorization': `Bearer ${sessionStorage.getItem('bw_actk')}`
+        },
+        body: bodyData,
+        credentials: "include"
+      }); 
+    }
+  }
 
   if (!response.ok) {
     const error = await response.text();

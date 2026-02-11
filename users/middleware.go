@@ -28,15 +28,17 @@ func SessionAuthMiddleware(f http.HandlerFunc) http.HandlerFunc {
 		cookie, err := r.Cookie("bw-actk")
 		if err != nil {
 			if err == http.ErrNoCookie {
-				log.Println("No bastille-web access token cookie found")
-				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				log.Println("No bw-actk cookie found redirect")
+				http.Redirect(w, r, "/refreshtpt", http.StatusUnauthorized)
 				return
 			} else {
-				log.Println("Error reading cookie:", err)
+				log.Println("Error reading bw-actk cookie redirect")
+				http.Redirect(w, r, "/refreshtpt", http.StatusUnauthorized)
+				return
 			}
 		} else {
-			log.Println("Found bastille-web access token cookie:")
-			ctx := context.WithValue(r.Context(), "access_token", cookie.Value)
+			log.Println("Cookie bw-actk found")
+			ctx := context.WithValue(r.Context(), "bw-actk", cookie.Value)
 			r = r.WithContext(ctx)
 		}
 
@@ -64,9 +66,8 @@ func ApiAuthMiddleware(f http.HandlerFunc) http.HandlerFunc {
 		pToken, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
 			return config.JwtKeyModel, nil
 		})
-
 		if err != nil || !pToken.Valid {
-			http.Error(w, "Invalid token", http.StatusUnauthorized)
+			http.Error(w, "Invalid Authorization token", http.StatusUnauthorized)
 			return
 		}
 

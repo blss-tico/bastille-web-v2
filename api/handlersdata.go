@@ -14,6 +14,29 @@ type HandlersData struct {
 	Bl bastille.Bastille
 }
 
+// health
+// @Summary health api check
+// @Description Route to check if bastille-web api is running.
+// @Tags health
+// @Produce  application/json
+// @Success 200 {object} string
+// @Router /health [get]
+func (hd *HandlersData) healthHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("healthHandler")
+
+	type HealthResponse struct {
+		Status string `json:"status"`
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	response := HealthResponse{Status: "bastille-web api running"}
+	err := json.NewEncoder(w).Encode(response)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
 // bootstrap
 // @Summary bootstrap command
 // @Description The bootstrap sub-command is used to download and extract releases and templates for use with Bastille containers. A valid release is needed before containers can be created. Templates are optional but are managed in the same manner.

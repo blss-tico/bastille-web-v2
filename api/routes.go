@@ -29,6 +29,7 @@ func (r *Routes) SwaggerRoutes(mux *http.ServeMux) {
 func (r *Routes) DataRoutes(mux *http.ServeMux) {
 	log.Println("dataRoutes")
 
+	mux.HandleFunc("GET /health", loggingMiddleware(r.Hd.bootstrap))
 	mux.HandleFunc("POST /bootstrap", loggingMiddleware(users.ApiAuthMiddleware(r.Hd.bootstrap)))
 	mux.HandleFunc("POST /clone", loggingMiddleware(users.ApiAuthMiddleware(r.Hd.clone)))
 	mux.HandleFunc("POST /cmd", loggingMiddleware(users.ApiAuthMiddleware(r.Hd.cmd)))

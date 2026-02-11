@@ -145,6 +145,11 @@
         sessionStorage.getItem('port'), 
         sessionStorage.getItem('hostname')
       );
+
+      setTimeout(async () => { 
+        await loadAllJailsIndex(); 
+        document.dispatchEvent(notifEventIndex("Jails loaded"));
+      }, 500);
     })();
     
     function redirectUrl() {
@@ -263,7 +268,7 @@
 
       try {       
         const bodyData = { options: "-j", action: "all" };
-        const response = await fetch(`/list`, {
+        let response = await fetch(`/list`, {
           method: 'POST',         
           headers: {
             'Access-Control-Allow-Origin': '*',
@@ -272,10 +277,36 @@
             'Authorization': `Bearer ${sessionStorage.getItem('bw_actk')}`
           },
           body: JSON.stringify(bodyData),
+          credentials: "include", 
           signal: controller.signal
         });
 
         clearTimeout(id);
+
+        if (response.status === 401) { 
+          const refreshRes = await fetch(`http://${ipaddr}:${port}/refresh`, { 
+            method: "POST",
+            body: JSON.stringify({ bw_rftk: sessionStorage.getItem('bw_rftk') }),
+            credentials: "include" 
+          }); 
+          
+          if (refreshRes.ok) { 
+            const data = await refreshRes.json();
+            sessionStorage.setItem("bw_actk", data.bw_actk); 
+            
+            response = await fetch(`/list`, {
+              method: 'POST',
+              headers: {
+                'access-control-allow-origin': '*',
+                'Content-Type': 'application/json',
+                'X-Request-ID': sessionStorage.getItem('id'),
+                'Authorization': `Bearer ${sessionStorage.getItem('bw_actk')}`
+              },
+              body: JSON.stringify(bodyData),
+              credentials: "include"
+            }); 
+          }
+        }            
 
         if (!response.ok) { throw new Error("error to load table data"); }
         const data = await response.json();
@@ -382,15 +413,12 @@
       disableButtons();
     
       const bodyData = { options: "", target: target, value: "" };
-      const controller = new AbortController();
-      const id = setTimeout(() => controller.abort(), timeout);
-
       let startJailBtn = document.getElementById(`startJailBtn${idx}`);
       startJailBtn.classList.add('loading');
       startJailBtn.innerHTML = '<span class="spinner"></span>';
 
       try {
-        const response = await fetch(`/start`, {
+        let response = await fetch(`/start`, {
           method: 'POST',          
           headers: {
             'Access-Control-Allow-Origin': '*',
@@ -400,10 +428,34 @@
             'Authorization': `Bearer ${sessionStorage.getItem('bw_actk')}`
           },
           body: JSON.stringify(bodyData),
-          signal: controller.signal
+          credentials: "include"
         });
-        
-        clearTimeout(id);
+
+        if (response.status === 401) { 
+          const refreshRes = await fetch(`/refresh`, { 
+            method: "POST",
+            body: JSON.stringify({ bw_rftk: sessionStorage.getItem('bw_rftk') }),
+            credentials: "include" 
+          }); 
+          
+          if (refreshRes.ok) { 
+            const data = await refreshRes.json();
+            sessionStorage.setItem("bw_actk", data.bw_actk); 
+            
+            response = await fetch(`/start`, {
+              method: 'POST',
+              headers: {
+                'access-control-allow-origin': '*',
+                'accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-Request-ID': sessionStorage.getItem('id'),
+                'Authorization': `Bearer ${sessionStorage.getItem('bw_actk')}`
+              },
+              body: JSON.stringify(bodyData),
+              credentials: "include"
+            }); 
+          }
+        }
 
         if (!response.ok) {        
           const error = await response.text();
@@ -411,7 +463,8 @@
         }
         
         enableButtons();
-        redirectUrl();
+        //redirectUrl();
+        await loadTables();
       } catch (error) {
         let msg;
         if (error.name === 'AbortError') { msg = `Failed to start jail - ${target}`; } 
@@ -429,15 +482,12 @@
       disableButtons();
       
       const bodyData = { options: "", target: target };
-      const controller = new AbortController();
-      const id = setTimeout(() => controller.abort(), timeout);
-
       let stopJailBtn = document.getElementById(`stopJailBtn${idx}`);
       stopJailBtn.classList.add('loading');
       stopJailBtn.innerHTML = '<span class="spinner"></span>';
 
       try {
-        const response = await fetch(`/stop`, {
+        let response = await fetch(`/stop`, {
           method: 'POST',
           headers: {
             'access-control-allow-origin': '*',
@@ -447,18 +497,43 @@
             'Authorization': `Bearer ${sessionStorage.getItem('bw_actk')}`
           },
           body: JSON.stringify(bodyData),
-          signal: controller.signal
+          credentials: "include"
         });
         
-        clearTimeout(id);
-
+        if (response.status === 401) { 
+          const refreshRes = await fetch(`/refresh`, { 
+            method: "POST",
+            body: JSON.stringify({ bw_rftk: sessionStorage.getItem('bw_rftk') }),
+            credentials: "include" 
+          }); 
+          
+          if (refreshRes.ok) { 
+            const data = await refreshRes.json();
+            sessionStorage.setItem("bw_actk", data.bw_actk); 
+            
+            response = await fetch(`/stop`, {
+              method: 'POST',
+              headers: {
+                'access-control-allow-origin': '*',
+                'accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-Request-ID': sessionStorage.getItem('id'),
+                'Authorization': `Bearer ${sessionStorage.getItem('bw_actk')}`
+              },
+              body: JSON.stringify(bodyData),
+              credentials: "include"
+            }); 
+          }
+        }
+        
         if (!response.ok) {
           const error = await response.text();
           throw new Error(error);
         }
 
         enableButtons();
-        redirectUrl();
+        //redirectUrl();
+        await loadTables();
       } catch (error) {
         let msg;
         if (error.name === 'AbortError') {  msg = `Failed to stop jail - ${target}`; } 

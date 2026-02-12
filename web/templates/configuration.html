@@ -10,6 +10,10 @@
         <small id="invalid-password"></small>
         <fieldset>
           <label for="action">
+            <input type="radio" id="list-users" name="action" value="list-users" onchange="handleRadioBtn(this)" />
+            list
+          </label>
+          <label for="action">
             <input type="radio" id="create-user" name="action" value="create-user" onchange="handleRadioBtn(this)" />
             create
           </label>
@@ -29,6 +33,7 @@
         <button class="outline contrast" onclick="backToHome(event)">Home</button>
       </div>
     </form>
+    <br>
     <div class="card-results">
       <p id="userResult" class="card-result"></p>
       <p id="userError" class="card-error"></p>
@@ -66,16 +71,36 @@
     let url = "";
     let method = "";
 
+    let ufieldError = document.getElementById(`invalid-username`);
+    let pfieldError = document.getElementById(`invalid-password`);
+    let lt = document.getElementById('list-users');
     let cr = document.getElementById('create-user');
     let up = document.getElementById('update-user');
     let dl = document.getElementById('delete-user');
 
     function handleRadioBtn(radio) {
+      let u = document.getElementById('username');
+      ufieldError.innerHTML = "";
+      ufieldError.setAttribute('aria-invalid', 'false');
+      u.disabled = false;
+
+      let p = document.getElementById('password');
+      pfieldError.innerHTML = "";
+      pfieldError.setAttribute('aria-invalid', 'false');
+      p.disabled = false;
+
+      lt.setAttribute('aria-invalid', 'false');
       cr.setAttribute('aria-invalid', 'false');
       up.setAttribute('aria-invalid', 'false');
       dl.setAttribute('aria-invalid', 'false');
 
       switch(radio.value) {
+        case 'list-users': 
+          url = '/users';
+          method = 'GET';
+          u.disabled = true;
+          p.disabled = true;
+          break;
         case 'create-user': 
           url = 'register';
           method = 'POST';
@@ -87,7 +112,6 @@
         case 'delete-user': 
           url = 'users/';
           method = 'DELETE';
-          let p = document.getElementById('password');
           p.disabled = true;
           break;
         default:
@@ -126,8 +150,6 @@
         if (key == "username") {
           let u = document.getElementById(key);
           u.style.borderColor = 'initial';
-
-          let ufieldError = document.getElementById(`invalid-${key}`);
           ufieldError.innerHTML = "";
 
           if (value != "") {
@@ -147,8 +169,6 @@
         if (key == "password") {
           let p = document.getElementById(key);
           p.style.borderColor = 'initial';
-
-          let pfieldError = document.getElementById(`invalid-${key}`);
           pfieldError.innerHTML = "";
 
           if (value != "") {
@@ -168,6 +188,7 @@
       if (error.innerText != "") { return; }
       
       if (!formObj.action) {
+        lt.setAttribute('aria-invalid', 'true');
         cr.setAttribute('aria-invalid', 'true');
         up.setAttribute('aria-invalid', 'true');
         dl.setAttribute('aria-invalid', 'true');
@@ -183,12 +204,24 @@
       submitBtn.innerHTML = '<span class="spinner"></span>';
 
       const response = await httpRequest(url, method, formJson);
-      if (response.code === 200 || response.code === 204) {
-        error.innerText = "";
-        result.innerText = response.data;
-      } else {
-        result.innerText = "";
-        error.innerText = response.error;
+      switch (response.code) {
+        case 200: 
+          error.innerText = "";
+          result.innerText = "";
+          const entries = Object.entries(response.data);
+          entries.map(v => result.innerText += v[1].id + "\t|" + v[1].username + "\n");
+          break;
+        case 201: 
+          error.innerText = "";
+          result.innerText = response.data;  
+          break;
+        case 204: 
+          error.innerText = "";
+          result.innerText = response.data;  
+          break;
+        default:
+          result.innerText = "";
+          error.innerText = response.error;  
       }
 
       submitBtn.classList.remove('loading');
@@ -204,18 +237,26 @@
       if (!ipaddr) { return { code: 500, error: 'ip address node missing' }; }
       if (!port) { return { code: 500, error: 'port node missing' }; }
       
-      const response = await fetch(`http://${ipaddr}:${port}/` + url, {
-        method: method,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'accept': 'application/json',
-          'Content-Type': 'application/json',
-          'X-Request-ID': sessionStorage.getItem('id'),
-          'Authorization': `Bearer ${sessionStorage.getItem('bw_actk')}`
-        },
-        body: bodyData,
-        credentials: "include"
-      });
+      let response;
+      if (method === 'GET') {
+        response = await fetch(`http://${ipaddr}:${port}/` + url, {
+          method: method,
+          credentials: "include"
+        });
+      } else {
+        response = await fetch(`http://${ipaddr}:${port}/` + url, {
+          method: method,
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'accept': 'application/json',
+            'Content-Type': 'application/json',
+            'X-Request-ID': sessionStorage.getItem('id'),
+            'Authorization': `Bearer ${sessionStorage.getItem('bw_actk')}`
+          },
+          body: bodyData,
+          credentials: "include"
+        });
+      }
 
       if (response.status === 401) { 
         const refreshRes = await fetch(`http://${ipaddr}:${port}/refresh`, { 
@@ -228,25 +269,53 @@
           const data = await refreshRes.json();
           sessionStorage.setItem("bw_actk", data.bw_actk); 
           
-          response = await fetch(`http://${ipaddr}:${port}/` + url, {
-            method: method,
-            headers: {
-              'Access-Control-Allow-Origin': '*',
-              'accept': 'application/json',
-              'Content-Type': 'application/json',
-              'X-Request-ID': sessionStorage.getItem('id'),
-              'Authorization': `Bearer ${sessionStorage.getItem('bw_actk')}`
-            },
-            body: bodyData,
-            credentials: "include"
-          }); 
+          if (method === 'GET') {
+            response = await fetch(`http://${ipaddr}:${port}/` + url, {
+              method: method,
+              credentials: "include"
+            });
+          } else {
+            response = await fetch(`http://${ipaddr}:${port}/` + url, {
+              method: method,
+              headers: {
+                'Access-Control-Allow-Origin': '*',
+                'accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-Request-ID': sessionStorage.getItem('id'),
+                'Authorization': `Bearer ${sessionStorage.getItem('bw_actk')}`
+              },
+              body: bodyData,
+              credentials: "include"
+            });
+          } 
         }
       }
 
       switch (method) {
+        case 'GET':
+          if (response.status !== 200) {
+            const error = await response.text();
+            console.log("[error]: ", error);
+            document.dispatchEvent(notifEventIndex(`Error ${response.status} - ${error}`));
+            return { code: response.status, error: error };
+          }
+          
+          const data = await response.json();
+          return { code: response.status, data: data };
+
+        case 'POST':
+          if (response.status !== 201) {
+            const error = await response.text();
+            console.log("[error]: ", error);
+            document.dispatchEvent(notifEventIndex(`Error ${response.status} - ${error}`));
+            return { code: response.status, error: error };
+          }
+          
+          return { code: response.status, data: "User created" };
+
         case 'PUT':
           if (response.status !== 204) {
-            const error = 'Failed to update user';
+            const error = await response.text();
             console.log("[error]: ", error);
             document.dispatchEvent(notifEventIndex(`Error ${response.status} - ${error}`));
             return { code: response.status, error: error };
@@ -256,7 +325,7 @@
 
         case 'DELETE':
           if (response.status !== 204) {
-            const error = 'Failed to delete user';
+            const error = await response.text();
             console.log("[error]: ", error);
             document.dispatchEvent(notifEventIndex(`Error ${response.status} - ${error}`));
             return { code: response.status, error: error };
@@ -264,16 +333,6 @@
           
           return { code: response.status, data: "User deleted" };
       }
-
-      if (!response.ok) {
-        const error = await response.text();
-        console.log("[error]: ", error);
-        document.dispatchEvent(notifEventIndex(`Error ${response.status} - ${error.message || error}`));
-        return { code: response.status, error: error };
-      }
-      
-      const responseData = await response.json();
-      return { code: response.status, data: responseData };
     }
   </script>
 {{end}}

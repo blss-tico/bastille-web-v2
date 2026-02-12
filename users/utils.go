@@ -2,6 +2,7 @@ package users
 
 import (
 	"bastille-web-v2/config"
+	"log"
 
 	"encoding/json"
 	"fmt"
@@ -10,7 +11,35 @@ import (
 
 var fileName = "./users.json"
 
+type AllUsers struct {
+	Id       string `json:"id"`
+	Username string `json:"username"`
+}
+
+func LoadAllUserFromFile() ([]AllUsers, error) {
+	log.Println("LoadAllUserFromFile")
+
+	fileBytes, err := os.ReadFile(fileName)
+	if err != nil {
+		return []AllUsers{}, fmt.Errorf("Error reading file: %v", err)
+	}
+
+	var users []config.UsersModel
+	if err := json.Unmarshal(fileBytes, &users); err != nil {
+		return []AllUsers{}, fmt.Errorf("Error unmarshalling JSON: %v", err)
+	}
+
+	allUsers := []AllUsers{}
+	for _, u := range users {
+		allUsers = append(allUsers, AllUsers{Id: u.ID, Username: u.Username})
+	}
+
+	return allUsers, nil
+}
+
 func LoadUserFromFile(user config.UsersModel) error {
+	log.Println("LoadUserFromFile")
+
 	fileBytes, err := os.ReadFile(fileName)
 	if err != nil {
 		return fmt.Errorf("Error reading file: %v", err)
@@ -33,6 +62,8 @@ func LoadUserFromFile(user config.UsersModel) error {
 }
 
 func RegisterUserToFile(user config.UsersModel) error {
+	log.Println("RegisterUserToFile")
+
 	fileBytes, err := os.ReadFile(fileName)
 	if err != nil {
 		return fmt.Errorf("Error reading file: %v", err)
@@ -63,6 +94,8 @@ func RegisterUserToFile(user config.UsersModel) error {
 }
 
 func UpdateUserToFile(username string, user config.UsersModel) error {
+	log.Println("UpdateUserToFile")
+
 	fileBytes, err := os.ReadFile(fileName)
 	if err != nil {
 		return fmt.Errorf("Error failed to read file: %w", err)
@@ -73,14 +106,20 @@ func UpdateUserToFile(username string, user config.UsersModel) error {
 		return fmt.Errorf("Error failed to unmarshal JSON: %w", err)
 	}
 
+	index := 0
 	for i, u := range users {
 		if fmt.Sprintf("%s", u.Username) == username {
 			users[i].Username = user.Username
 			if user.Password != "" {
 				hashed, _ := config.HashPasswordUtil(user.Password)
 				users[i].Password = hashed
+				index = i
 			}
 		}
+	}
+
+	if index == 0 {
+		return fmt.Errorf("Error user %s not found", username)
 	}
 
 	updatedData, err := json.MarshalIndent(users, "", "  ")
@@ -95,7 +134,9 @@ func UpdateUserToFile(username string, user config.UsersModel) error {
 	return nil
 }
 
-func DeleteUserFromFile(username string, user config.UsersModel) error {
+func DeleteUserFromFile(username string) error {
+	log.Println("DeleteUserFromFile")
+
 	fileBytes, err := os.ReadFile(fileName)
 	if err != nil {
 		return fmt.Errorf("Error failed to read file: %w", err)
@@ -114,10 +155,14 @@ func DeleteUserFromFile(username string, user config.UsersModel) error {
 		}
 	}
 
+	if index == 0 {
+		return fmt.Errorf("Error user %s not found", username)
+	}
+
 	users = append(users[:index], users[index+1:]...)
 	updatedData, err := json.MarshalIndent(users, "", "  ")
 	if err != nil {
-		return fmt.Errorf("Error failed to marshal updated JSON: %w", err)
+		return fmt.Errorf("Error failed to marshal deleted JSON: %w", err)
 	}
 
 	if err := os.WriteFile(fileName, updatedData, 0644); err != nil {

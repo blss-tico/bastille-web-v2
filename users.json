@@ -5,8 +5,13 @@
     "password": "$2a$14$cXAQzCUdT7uUZxpSpP5mW.OxS4wNLmmgpUpOnRpxMyKFusoaWl/8q"
   },
   {
-    "id": "01KH4VXTFF934BJQ2CHWHDP6JR",
+    "id": "01KH70GASSA3W34XQZ0W79HF6B",
     "username": "bruno",
-    "password": "$2a$14$sRirVTPkt7oVkWC17on7OuHhtpgt8X0hMegeNLQsJjYkb6gLu9o8C"
+    "password": "$2a$14$4uBVewhvOXn3X55lQc4rL.NFa.tBR7QzIuRpjA6C3eNBOU2l659.y"
+  },
+  {
+    "id": "01KH71MVW3V1NVQGP8YD1A652A",
+    "username": "cris",
+    "password": "$2a$14$E4QxMloqctJNFLt.bR7rae9V/xQibZLvRquUpTEr08eBzxf3Myr5q"
   }
 ]

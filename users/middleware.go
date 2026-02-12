@@ -25,20 +25,20 @@ func SessionAuthMiddleware(f http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Println("SessionAuthMiddleware")
 
-		cookie, err := r.Cookie("bw-actk")
+		cookie, err := r.Cookie("bw-session")
 		if err != nil {
 			if err == http.ErrNoCookie {
-				log.Println("No bw-actk cookie found redirect")
-				http.Redirect(w, r, "/refreshtpt", http.StatusUnauthorized)
+				log.Println("No bw-session cookie found")
+				http.Error(w, "Missing authentication", http.StatusUnauthorized)
 				return
 			} else {
-				log.Println("Error reading bw-actk cookie redirect")
-				http.Redirect(w, r, "/refreshtpt", http.StatusUnauthorized)
+				log.Println("Error reading bw-session cookie")
+				http.Error(w, "Error authentication", http.StatusUnauthorized)
 				return
 			}
 		} else {
-			log.Println("Cookie bw-actk found")
-			ctx := context.WithValue(r.Context(), "bw-actk", cookie.Value)
+			log.Println("Cookie bw-session found")
+			ctx := context.WithValue(r.Context(), "bw-session", cookie.Value)
 			r = r.WithContext(ctx)
 		}
 

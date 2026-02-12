@@ -5,7 +5,6 @@ import (
 	"crypto/rand"
 
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -104,27 +103,15 @@ func (hu *HandlersUser) login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	accessCookie := &http.Cookie{
-		Name:     "bw-actk",
+		Name:     "bw-session",
 		Value:    accessString,
 		Path:     "/",
-		Expires:  time.Now().Add(1 * time.Minute),
-		HttpOnly: true,
-		Secure:   false,
-		SameSite: http.SameSiteStrictMode,
-	}
-
-	refreshCookie := &http.Cookie{
-		Name:     "bw-rftk",
-		Value:    refreshString,
-		Path:     "/",
-		Expires:  time.Now().Add(7 * 24 * time.Hour),
 		HttpOnly: true,
 		Secure:   false,
 		SameSite: http.SameSiteStrictMode,
 	}
 
 	http.SetCookie(w, accessCookie)
-	http.SetCookie(w, refreshCookie)
 
 	err = json.NewEncoder(w).Encode(map[string]string{
 		"bw_actk": accessString,
@@ -140,27 +127,16 @@ func (hu *HandlersUser) logout(w http.ResponseWriter, r *http.Request) {
 	log.Println("logoutHandler")
 
 	accessCookie := &http.Cookie{
-		Name:     "bw-actk",
+		Name:     "bw-session",
 		Value:    "",
 		Path:     "/",
-		Expires:  time.Now(),
 		HttpOnly: true,
 		Secure:   false,
 		SameSite: http.SameSiteStrictMode,
-	}
-
-	refreshCookie := &http.Cookie{
-		Name:     "bw-rftk",
-		Value:    "",
-		Path:     "/",
-		Expires:  time.Now(),
-		HttpOnly: true,
-		Secure:   false,
-		SameSite: http.SameSiteStrictMode,
+		MaxAge:   -1,
 	}
 
 	http.SetCookie(w, accessCookie)
-	http.SetCookie(w, refreshCookie)
 
 	err := json.NewEncoder(w).Encode(map[string]string{
 		"bw_actk": "",
@@ -202,52 +178,20 @@ func (hu *HandlersUser) refreshTkApi(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (hu *HandlersUser) refreshCkTpt(w http.ResponseWriter, r *http.Request) {
-	log.Println("refreshCkTptHandler")
+func (hu *HandlersUser) getUsers(w http.ResponseWriter, r *http.Request) {
+	log.Println("getUsersHandler")
 
-	cookie, err := r.Cookie("bw-rftk")
+	allUsers, err := LoadAllUserFromFile()
 	if err != nil {
-		if err == http.ErrNoCookie {
-			log.Println("No bastille-web refresh token cookie found")
-			http.Error(w, err.Error(), http.StatusUnauthorized)
-			return
-		} else {
-			log.Println("Error reading refesh cookie:", err)
-			http.Error(w, err.Error(), http.StatusUnauthorized)
-			return
-		}
-	}
-
-	claims := &claimsModel{}
-	tkn, err := jwt.ParseWithClaims(cookie.Value, claims, func(token *jwt.Token) (interface{}, error) {
-		return config.RefreshKeyModel, nil
-	})
-	if err != nil || !tkn.Valid {
-		w.WriteHeader(http.StatusUnauthorized)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	expirationTime := time.Now().Add(1 * time.Minute)
-	claims.ExpiresAt = expirationTime.Unix()
-	newToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	accessString, _ := newToken.SignedString(config.JwtKeyModel)
-
-	accessCookie := &http.Cookie{
-		Name:     "bw-actk",
-		Value:    accessString,
-		Path:     "/",
-		Expires:  time.Now().Add(1 * time.Minute),
-		HttpOnly: true,
-		Secure:   false,
-		SameSite: http.SameSiteStrictMode,
+	err = json.NewEncoder(w).Encode(allUsers)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
-
-	http.SetCookie(w, accessCookie)
-}
-
-func (hu *HandlersUser) getUsers(w http.ResponseWriter, r *http.Request) {
-	log.Println("getUsersHandler")
-	json.NewEncoder(w).Encode(config.BwUsers)
 }
 
 func (hu *HandlersUser) updateUser(w http.ResponseWriter, r *http.Request) {
@@ -274,14 +218,13 @@ func (hu *HandlersUser) deleteUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("deleteUserHandler")
 
 	username := r.PathValue("username")
-	for i, u := range config.BwUsers {
-		if fmt.Sprintf("%s", u.Username) == username {
-			config.BwUsers = append(config.BwUsers[:i], config.BwUsers[i+1:]...)
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
+	err := DeleteUserFromFile(username)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
-	w.WriteHeader(http.StatusNotFound)
+
+	w.WriteHeader(http.StatusNoContent)
 }
 
 /*

@@ -170,13 +170,13 @@ footer {
 }
 
 .btn-home-start-jail {
-  font-size: 0.9rem;
+  font-size: 0.7rem;
   padding: 3px;
   margin: 4px;
 }
 
 .btn-home-stop-jail {
-  font-size: 0.9rem;
+  font-size: 0.7rem;
   padding-top: 3px;
   padding-bottom: 3px;
   padding-left: 6px;
@@ -476,8 +476,8 @@ footer {
   .tbl-home-td-btns {
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 0.8em;
+    justify-content: left;
+    font-size: 0.7em;
   }
 
   .tbl-hidden-td-data {

@@ -11,27 +11,22 @@ import (
 
 var fileName = "./users.json"
 
-type AllUsers struct {
-	Id       string `json:"id"`
-	Username string `json:"username"`
-}
-
-func LoadAllUserFromFile() ([]AllUsers, error) {
+func LoadAllUserFromFile() ([]AllUsersModel, error) {
 	log.Println("LoadAllUserFromFile")
 
 	fileBytes, err := os.ReadFile(fileName)
 	if err != nil {
-		return []AllUsers{}, fmt.Errorf("Error reading file: %v", err)
+		return []AllUsersModel{}, fmt.Errorf("Error reading file: %v", err)
 	}
 
 	var users []config.UsersModel
 	if err := json.Unmarshal(fileBytes, &users); err != nil {
-		return []AllUsers{}, fmt.Errorf("Error unmarshalling JSON: %v", err)
+		return []AllUsersModel{}, fmt.Errorf("Error unmarshalling JSON: %v", err)
 	}
 
-	allUsers := []AllUsers{}
+	allUsers := []AllUsersModel{}
 	for _, u := range users {
-		allUsers = append(allUsers, AllUsers{Id: u.ID, Username: u.Username})
+		allUsers = append(allUsers, AllUsersModel{Id: u.ID, Username: u.Username})
 	}
 
 	return allUsers, nil

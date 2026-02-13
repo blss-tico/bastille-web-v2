@@ -1,60 +1,80 @@
-{{define "content"}}
+{{define "content"}}  
   <div class="card">
-    <header>Users</header>
+    <header>USERS</header>    
     <br>
-    <form id="user-form" class="card-form">
-      <fieldset>
-        <input type="text" placeholder="username" name="username" id="username" class="input-text" aria-describedby="invalid-username" />
-        <small id="invalid-username"></small>
-        <input type="password" placeholder="password" name="password" id="password" class="input-text" aria-describedby="invalid-password" />
-        <small id="invalid-password"></small>
+    <div>
+      <form id="user-form" class="card-form">
         <fieldset>
-          <label for="action">
-            <input type="radio" id="list-users" name="action" value="list-users" onchange="handleRadioBtn(this)" />
-            list
-          </label>
-          <label for="action">
-            <input type="radio" id="create-user" name="action" value="create-user" onchange="handleRadioBtn(this)" />
-            create
-          </label>
-          <label for="action">
-            <input type="radio" id="update-user" name="action" value="update-user" onchange="handleRadioBtn(this)" />
-            update
-          </label>
-          <label for="action">
-            <input type="radio" id="delete-user" name="action" value="delete-user" onchange="handleRadioBtn(this)" />
-            delete
-          </label>
+          <input type="text" placeholder="username" name="username" id="username" class="input-text" aria-describedby="invalid-username" />
+          <small id="invalid-username"></small>
+          <input type="password" placeholder="password" name="password" id="password" class="input-text" aria-describedby="invalid-password" />
+          <small id="invalid-password"></small>
+          <fieldset>
+            <label for="action">
+              <input type="radio" id="list-users" name="action" value="list-users" onchange="handleRadioBtn(this)" />
+              list
+            </label>
+            <label for="action">
+              <input type="radio" id="create-user" name="action" value="create-user" onchange="handleRadioBtn(this)" />
+              create
+            </label>
+            <label for="action">
+              <input type="radio" id="update-user" name="action" value="update-user" onchange="handleRadioBtn(this)" />
+              update
+            </label>
+            <label for="action">
+              <input type="radio" id="delete-user" name="action" value="delete-user" onchange="handleRadioBtn(this)" />
+              delete
+            </label>
+          </fieldset>
         </fieldset>
-      </fieldset>
-      <div class="grid">
-        <button id="submitBtn" class="secondary btn-card-submit" onclick="userSubmit(event)">Submit</button>
-        <button class="primary btn-card-help" onclick="clearUser(event)">Clear</button>
-        <button class="outline contrast" onclick="backToHome(event)">Home</button>
-      </div>
-    </form>
-    <br>
+        <div class="grid">
+          <button id="submitBtn" class="secondary btn-card-submit" onclick="userSubmit(event)">Submit</button>
+          <button class="primary btn-card-help" onclick="clearUser(event)">Clear</button>
+          <button class="outline contrast" onclick="backToHome(event)">Home</button>
+        </div>
+      </form>
+    </div>
+    <br><br>
     <div class="card-results">
       <p id="userResult" class="card-result"></p>
       <p id="userError" class="card-error"></p>
     </div>
   </div>
-  <hr>
+  <br>
   <div class="card">
-    <header>Nodes</header>
+    <header>NODES</header>
     <br>
     <div>
-      <form id="node-form" class="card-form">
+      <form id="nodes-form" class="card-form">
         <fieldset>
-          <input type="text" placeholder="nodename" name="nodename" id="nodename" class="input-text" aria-describedby="invalid-nodename" />
+          <input type="text" placeholder="node name" name="nodename" id="nodename" class="input-text" aria-describedby="invalid-nodename" />
           <small id="invalid-nodename"></small>
-          <input type="text" placeholder="nodeip" name="nodeip" id="nodeip" class="input-text" aria-describedby="invalid-nodeip" />
+          <input type="text" placeholder="node ip" name="nodeip" id="nodeip" class="input-text" aria-describedby="invalid-nodeip" />
           <small id="invalid-nodeip"></small>
-          <input type="text" placeholder="nodeport" name="nodeport" id="nodeport" class="input-text" aria-describedby="invalid-nodeport" />
+          <input type="text" placeholder="node port" name="nodeport" id="nodeport" class="input-text" aria-describedby="invalid-nodeport" />
           <small id="invalid-nodeport"></small>
+          <fieldset>
+            <label for="action">
+              <input type="radio" id="list-nodes" name="action" value="list-nodes" onchange="handleRadioNodeBtn(this)" />
+              list
+            </label>
+            <label for="action">
+              <input type="radio" id="create-node" name="action" value="create-node" onchange="handleRadioNodeBtn(this)" />
+              create
+            </label>
+            <label for="action">
+              <input type="radio" id="update-node" name="action" value="update-node" onchange="handleRadioNodeBtn(this)" />
+              update
+            </label>
+            <label for="action">
+              <input type="radio" id="delete-node" name="action" value="delete-node" onchange="handleRadioNodeBtn(this)" />
+              delete
+            </label>
+          </fieldset>
         </fieldset>
         <div class="grid">
-          <button id="submitNodeBtn" class="secondary btn-card-submit" onclick="nodeSubmit(event)">Submit</button>
+          <button id="submitNodeBtn" class="secondary btn-card-submit" onclick="nodesSubmit(event)">Submit</button>
           <button class="primary btn-card-help" onclick="nodeClear(event)">Clear</button>
           <button class="outline contrast" onclick="backToHome(event)">Home</button>
         </div>
@@ -62,15 +82,16 @@
     </div>
     <br><br>
     <div class="card-results">
-      <p id="nodeResult" class="card-result"></p>
-      <p id="nodeError" class="card-error"></p>
+      <p id="nodesResult" class="card-result"></p>
+      <p id="nodesError" class="card-error"></p>
     </div>
   </div>
-
+  
   <script>
     let url = "";
     let method = "";
-
+    let u = document.getElementById('username');
+    let p = document.getElementById('password');
     let ufieldError = document.getElementById(`invalid-username`);
     let pfieldError = document.getElementById(`invalid-password`);
     let lt = document.getElementById('list-users');
@@ -79,12 +100,10 @@
     let dl = document.getElementById('delete-user');
 
     function handleRadioBtn(radio) {
-      let u = document.getElementById('username');
       ufieldError.innerHTML = "";
       ufieldError.setAttribute('aria-invalid', 'false');
       u.disabled = false;
 
-      let p = document.getElementById('password');
       pfieldError.innerHTML = "";
       pfieldError.setAttribute('aria-invalid', 'false');
       p.disabled = false;
@@ -117,6 +136,61 @@
         default:
           url = "";
           method = "";
+      }
+    }
+
+    let urlNode = "";
+    let methodNode = "";
+    let nn = document.getElementById('nodename');
+    let ipn = document.getElementById('nodeip');
+    let ptn = document.getElementById('nodeport');
+    let nnfieldError = document.getElementById(`invalid-nodename`);
+    let ipnfieldError = document.getElementById(`invalid-nodeip`);
+    let ptnfieldError = document.getElementById(`invalid-nodeport`);
+    let ltn = document.getElementById('list-nodes');
+    let crn = document.getElementById('create-node');
+    let upn = document.getElementById('update-node');
+    let dln = document.getElementById('delete-node');
+
+    function handleRadioNodeBtn(radio) {
+      nnfieldError.innerHTML = "";
+      nnfieldError.setAttribute('aria-invalid', 'false');
+      nn.disabled = false;
+
+      ipnfieldError.innerHTML = "";
+      ipnfieldError.setAttribute('aria-invalid', 'false');
+      ipn.disabled = false;
+
+      ptnfieldError.innerHTML = "";
+      ptnfieldError.setAttribute('aria-invalid', 'false');
+      ptn.disabled = false;
+
+      ltn.setAttribute('aria-invalid', 'false');
+      crn.setAttribute('aria-invalid', 'false');
+      upn.setAttribute('aria-invalid', 'false');
+      dln.setAttribute('aria-invalid', 'false');
+
+      methodNode = "";
+      switch(radio.value) {
+        case 'list-nodes': 
+          methodNode = 'GET';
+          nn.disabled = true;
+          ipn.disabled = true;
+          ptn.disabled = true;
+          break;
+        case 'create-node': 
+          methodNode = 'POST';
+          break;
+        case 'update-node': 
+          methodNode = 'PUT';
+          break;
+        case 'delete-node':
+          methodNode = 'DELETE';
+          ipn.disabled = true;
+          ptn.disabled = true;
+          break;
+        default:
+          methodNode = "";
       }
     }
 
@@ -203,32 +277,162 @@
       submitBtn.classList.add('loading');
       submitBtn.innerHTML = '<span class="spinner"></span>';
 
-      const response = await httpRequest(url, method, formJson);
+      const response = await httpRequest(url, method, formJson, "User");
+      error.innerText = "";
+      result.innerText = "";
+      url = "";
+      method = "";
+
       switch (response.code) {
-        case 200: 
-          error.innerText = "";
-          result.innerText = "";
+        case 200:
           const entries = Object.entries(response.data);
+          if (entries.length == 0) { 
+            result.innerText = "Users not found"; 
+            break;
+          }
+          result.innerText = "List all users \n";
           entries.map(v => result.innerText += v[1].id + "\t|" + v[1].username + "\n");
           break;
-        case 201: 
-          error.innerText = "";
-          result.innerText = response.data;  
+        case 201:
+          result.innerText = response.data; 
           break;
-        case 204: 
-          error.innerText = "";
-          result.innerText = response.data;  
+        case 204:
+          result.innerText = response.data; 
           break;
         default:
-          result.innerText = "";
-          error.innerText = response.error;  
+          error.innerText = response.error;
       }
 
       submitBtn.classList.remove('loading');
       submitBtn.innerHTML = 'Submit';
     }
 
-    async function httpRequest(url, method, bodyData) {
+    async function nodesSubmit(event) {
+      event.preventDefault();
+      
+      const result = document.getElementById('nodesResult');
+      const error = document.getElementById('nodesError');
+      result.innerText = "";
+      error.innerText = ""; 
+
+      const form = document.getElementById('nodes-form');
+      const formData = new FormData(form);
+      let actions = [];
+      let formObj = {};
+      formData.forEach((value, key) => {
+        if (key == "action") {
+          formObj[key] = value;
+          if (methodNode === 'GET') { urlNode = 'nodes'; }
+          return;
+        }
+
+        value = value.trim();
+
+        if (key == "nodename") {
+          let n = document.getElementById(key);
+          n.style.borderColor = 'initial';
+          nnfieldError.innerHTML = "";
+
+          if (value != "") {
+            u.setAttribute('aria-invalid', 'false');
+            formObj[key] = value;
+            if (methodNode === 'PUT' || methodNode === 'DELETE') {  urlNode = 'nodes/' + value; }
+            if (methodNode === 'POST') {  urlNode = 'nodes'; }
+            return;
+          }
+
+          let errorString = "[Error]: node name is a required field";
+          error.innerText = errorString;
+          n.style.borderColor = '#e72727';
+          n.setAttribute('aria-invalid', 'true');
+          nnfieldError.innerHTML = errorString;
+        }
+
+        if (key == "nodeip") {
+          let ip = document.getElementById(key);
+          ip.style.borderColor = 'initial';
+          ipnfieldError.innerHTML = "";
+
+          if (value != "") {
+            ip.setAttribute('aria-invalid', 'false');
+            formObj[key] = value;
+            return;
+          }
+
+          let errorString = "[Error]: node ip is a required field";
+          error.innerText = errorString;
+          ip.style.borderColor = '#e72727';
+          ip.setAttribute('aria-invalid', 'true');
+          ipnfieldError.innerHTML = errorString;
+        }
+
+        if (key == "nodeport") {
+          let pt = document.getElementById(key);
+          pt.style.borderColor = 'initial';
+          ptnfieldError.innerHTML = "";
+
+          if (value != "") {
+            pt.setAttribute('aria-invalid', 'false');
+            formObj[key] = value;
+            return;
+          }
+
+          let errorString = "[Error]: node ip is a required field";
+          error.innerText = errorString;
+          pt.style.borderColor = '#e72727';
+          pt.setAttribute('aria-invalid', 'true');
+          ptnfieldError.innerHTML = errorString;
+        }
+      });
+
+      if (error.innerText != "") { return; }
+      
+      if (!formObj.action) {
+        ltn.setAttribute('aria-invalid', 'true');
+        crn.setAttribute('aria-invalid', 'true');
+        upn.setAttribute('aria-invalid', 'true');
+        dln.setAttribute('aria-invalid', 'true');
+        return;
+      }
+
+      const formJson = JSON.stringify(formObj);
+      
+      result.innerText = 'send -> ';
+
+      let submitBtn = document.getElementById('submitNodeBtn');
+      submitBtn.classList.add('loading');
+      submitBtn.innerHTML = '<span class="spinner"></span>';
+
+      console.log(urlNode, methodNode, formJson, "Node");
+      const response = await httpRequest(urlNode, methodNode, formJson, "Node");
+      error.innerText = "";
+      result.innerText = "";
+      
+      switch (response.code) {
+        case 200:     
+          const entries = Object.entries(response.data);
+          if (entries.length == 0) { 
+            result.innerText = "Nodes not found"; 
+            break;
+          }
+          result.innerText = "List all nodes \n";
+          entries.map(v => result.innerText += v[1].nodename + "\t|" + v[1].nodeip + "\t|" + v[1].nodeport + "\n");
+          break;
+        case 201: 
+          result.innerText = response.data;
+          break;
+        case 204: 
+          result.innerText = response.data;  
+          break;
+        default:
+          error.innerText = response.error;
+      }
+
+      submitBtn.classList.remove('loading');
+      submitBtn.innerHTML = 'Submit';
+    }
+
+    async function httpRequest(url, method, bodyData, who) {
       console.log("[info]: httpRequest ", url, method);
 
       const ipaddr = sessionStorage.getItem('ipaddr'); 
@@ -258,7 +462,7 @@
         });
       }
 
-      if (response.status === 401) { 
+      if (response.status === 401) {
         const refreshRes = await fetch(`http://${ipaddr}:${port}/refresh`, { 
           method: "POST",
           body: JSON.stringify({ bw_rftk: sessionStorage.getItem('bw_rftk') }),
@@ -311,7 +515,7 @@
             return { code: response.status, error: error };
           }
           
-          return { code: response.status, data: "User created" };
+          return { code: response.status, data: `${who} created` };
 
         case 'PUT':
           if (response.status !== 204) {
@@ -321,7 +525,7 @@
             return { code: response.status, error: error };
           }
           
-          return { code: response.status, data: "User updated" };
+          return { code: response.status, data: `${who} updated` };
 
         case 'DELETE':
           if (response.status !== 204) {
@@ -331,7 +535,7 @@
             return { code: response.status, error: error };
           }
           
-          return { code: response.status, data: "User deleted" };
+          return { code: response.status, data: `${who} deleted` };
       }
     }
   </script>

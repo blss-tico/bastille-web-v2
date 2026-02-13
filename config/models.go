@@ -16,6 +16,12 @@ type UsersModel struct {
 	Password string `json:"password" example:"secretpassword" format:"string"`
 }
 
+type NodesModel struct {
+	Nodename string `json:"nodename" example:"Node01" format:"string"`
+	Nodeip   string `json:"nodeip" example:"192.168.1.1" format:"string"`
+	Nodeport string `json:"nodeport" example:"8007" format:"string"`
+}
+
 type BastilleOptionsModel struct {
 	Sflag string
 	Lflag string
@@ -36,11 +42,4 @@ type BastilleModel struct {
 	Options  []string                `json:"options"`
 	Help     string                  `json:"help"`
 	Commands []BastilleCommandsModel `json:"commands"`
-}
-
-type NodesModel struct {
-	Host string `json:"host"`
-	Ip   string `json:"ip"`
-	Port string `json:"port"`
-	Key  string `json:"key"`
 }

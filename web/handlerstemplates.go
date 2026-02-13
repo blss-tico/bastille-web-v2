@@ -142,6 +142,8 @@ func (ht *HandlersTemplates) home(w http.ResponseWriter, r *http.Request) {
 		}
 	*/
 
+	config.LoadNodesFile()
+
 	type HomeData struct {
 		CommandName string
 		Data        config.BastilleModel

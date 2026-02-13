@@ -4,6 +4,7 @@ import (
 	"bastille-web-v2/api"
 	"bastille-web-v2/bastille"
 	"bastille-web-v2/config"
+	"bastille-web-v2/nodes"
 	"bastille-web-v2/users"
 	"bastille-web-v2/web"
 
@@ -44,6 +45,10 @@ func startHttpServer() {
 	handlerUsers := &users.HandlersUser{}
 	userRoutes := users.NewRoutes(*handlerUsers)
 	userRoutes.UserRoutes(mux)
+
+	handlerNodes := &nodes.HandlersNodes{}
+	nodesRoutes := nodes.NewRoutes(*handlerNodes)
+	nodesRoutes.NodesRoutes(mux)
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},

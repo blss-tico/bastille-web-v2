@@ -9,12 +9,10 @@ window.onload = () => {
   const uuidFmt = uuidv7StringFormat(uuidStr);
   sessionStorage.setItem('id', uuidFmt);
 
-  /*
   setTimeout(async () => { 
     await loadAllJailsIndex(); 
     document.dispatchEvent(notifEventIndex("Jails loaded"));
   }, 500);
-  */
 }
 
 function notifEventIndex(message) {
@@ -48,7 +46,8 @@ async function sendHttpRequest(url, bodyData) {
   if (!ipaddr) { return { code: 500, error: 'ip address node missing' }; }
   if (!port) { return { code: 500, error: 'port node missing' }; }
   
-  let response = await fetch(`http://${ipaddr}:${port}/` + url, {
+  let response;
+  response = await fetch(`http://${ipaddr}:${port}/` + url, {
     method: 'POST',
     headers: {
       'Access-Control-Allow-Origin': '*',

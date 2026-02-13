@@ -1,7 +1,6 @@
 package config
 
 import (
-	"bastille-web-v2/bastille"
 	"bastille-web-v2/docs"
 
 	"encoding/json"
@@ -14,13 +13,15 @@ import (
 func LoadConfigParams() {
 	log.Println("loadConfigParams")
 
-	// check bastille installation
-	_, err := bastille.RunBastilleCommands("-v")
-	if err != nil {
-		log.Fatalln("error: bastille not installed on machine or not found")
-	}
+	LoadEnvVarsFile()
+	LoadUsersFile()
+	LoadBastilleFile()
+	LoadNodesFile()
+	LoadIpNumbers()
+}
 
-	err = godotenv.Load(".env")
+func LoadEnvVarsFile() {
+	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal("error loading .env file")
 	}
@@ -54,8 +55,9 @@ func LoadConfigParams() {
 	if len(RefreshKeyModel) == 0 {
 		log.Fatalln("error: bastille-web refresh jwt secret key not loaded")
 	}
+}
 
-	// load bastille users
+func LoadUsersFile() {
 	usersFile, err := os.ReadFile("users.json")
 	if err != nil {
 		log.Fatalf("error: %v", err)
@@ -66,8 +68,9 @@ func LoadConfigParams() {
 		log.Fatalf("error unmarshaling JSON: %v", err)
 	}
 	log.Println("users.json ok")
+}
 
-	// load bastille definitions
+func LoadBastilleFile() {
 	bastilleFile, err := os.ReadFile("bastille.json")
 	if err != nil {
 		log.Fatalf("error: %v", err)
@@ -78,19 +81,26 @@ func LoadConfigParams() {
 		log.Fatalf("error unmarshaling JSON: %v", err)
 	}
 	log.Println("bastille.json ok")
+}
 
-	// load nodes configuration file
+func LoadNodesFile() {
 	nodesFile, err := os.ReadFile("nodes.json")
 	if err != nil {
 		log.Fatalf("error: %v", err)
 	}
 
-	err = json.Unmarshal(nodesFile, &NodesListModel)
-	if err != nil {
-		log.Fatalf("error unmarshaling JSON: %v", err)
+	if len(nodesFile) > 0 {
+		err = json.Unmarshal(nodesFile, &NodesListModel)
+		if err != nil {
+			log.Fatalf("error unmarshaling JSON: %v", err)
+		}
+		log.Println("nodes.json ok", NodesListModel)
+	} else {
+		log.Println("nodes.json is empty or incorrect", NodesListModel)
 	}
-	log.Println("nodes.json ok", NodesListModel)
+}
 
+func LoadIpNumbers() {
 	ip1 := GetOutboundIPUtil()
 	log.Println("ip1[external lookup]: ", ip1)
 

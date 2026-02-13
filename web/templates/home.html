@@ -20,11 +20,11 @@
       {{range .Nodes}}        
         <div 
           class="card" 
-          id="external-{{.Host}}" 
-          onclick="nodeExternal('{{.Ip}}', '{{.Port}}', '{{.Host}}')"          
+          id="external-{{.Nodename}}" 
+          onclick="nodeExternal('{{.Nodeip}}', '{{.Nodeport}}', '{{.Nodename}}')"          
         >
-          <h4>[ {{ .Host}} ]</h4>            
-          <strong>{{ .Ip}}:{{.Port}}</strong>
+          <h4>[ {{ .Nodename}} ]</h4>            
+          <strong>{{ .Nodeip}}:{{.Nodeport}}</strong>
         </div>        
       {{end}}
     </div>
@@ -104,6 +104,9 @@
 
     const thisMachine = "{{.SysInfo.Hostname}}";
     const timeout = 5000;
+    let ipaddr;
+    let port;
+    let hostName;
     
     let iframe;
     let btnsStart = document.getElementsByClassName("btn-home-start-jail");
@@ -140,16 +143,11 @@
       sessionStorage.removeItem("hostname");
       sessionStorage.setItem("hostname", "{{.SysInfo.Hostname}}");
 
-      nodeSelection(
-        sessionStorage.getItem('ipaddr'), 
-        sessionStorage.getItem('port'), 
-        sessionStorage.getItem('hostname')
-      );
+      ipaddr = sessionStorage.getItem('ipaddr');
+      port = sessionStorage.getItem('port');
+      hostName = sessionStorage.getItem('hostname');
 
-      setTimeout(async () => { 
-        await loadAllJailsIndex(); 
-        document.dispatchEvent(notifEventIndex("Jails loaded"));
-      }, 500);
+      nodeSelection(ipaddr, port, hostName);
     })();
     
     function redirectUrl() {
@@ -188,7 +186,9 @@
       console.log(`[info]: nodeSelection ${ipAddr}:${port} - ${hostName}`);
 
       setNode(ipAddr, port, hostName);
+
       await loadTables();
+      document.dispatchEvent(notifEventIndex("Jails loaded"));
     }
 
     function setNode(ipAddr, port, hostName) {
@@ -204,207 +204,204 @@
       let nHst = document.getElementById(hostName);
       nHst.style.borderColor = "#01aaff";
       console.log("[info]: node selected ", sessionStorage.getItem('hostname'))
-
-      // if (hostName === thisMachine) { return; }
     }
 
     async function loadNodeInfo(ipAddr, port, hostName) {
       console.log(`[info]: loadNodeInfo`);
+      
+      let response;
+      response = await fetch(`http://${ipAddr}:${port}/node`, {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'accept': 'application/json',
+          'X-Request-ID': sessionStorage.getItem('id'),
+          'Authorization': `Bearer ${sessionStorage.getItem('bw_actk')}`
+        },
+        credentials: "include"
+      });
 
-      const controller = new AbortController();
-      const id = setTimeout(() => controller.abort(), timeout);
-
-      try {
-        const response = await fetch(`http://${ipAddr}:${port}/node`, {
-          headers: {
-            'Access-Control-Allow-Origin': '*',
-            'accept': 'application/json',
-            'X-Request-ID': sessionStorage.getItem('id'),
-            'Authorization': `Bearer ${sessionStorage.getItem('bw_actk')}`
-          },
-          signal: controller.signal
-        });
+      if (response.status === 401) { 
+        const refreshRes = await fetch(`http://${ipaddr}:${port}/refresh`, { 
+          method: "POST",
+          body: JSON.stringify({ bw_rftk: sessionStorage.getItem('bw_rftk') }),
+          credentials: "include" 
+        }); 
         
-        clearTimeout(id);
-
-        if (response.status !== 200) { throw new Error(response.status); }        
-        const dt = await response.json();
-
-        // create node card dynamicaly
-        const data = Object.entries(dt);
-        if (data.length > 0) {
-          data.forEach((value, idx) => {
-            let smallExists = document.getElementById("small"+hostName+String(idx));
-            if (smallExists) { return; }
-
-            let hstCard = document.getElementById("external-"+hostName);
-            let small = document.createElement('small');
-            small.id = "small"+hostName+String(idx);
-            small.innerHTML = `<br> ${value[0].toUpperCase()} ${value[1]}`;
-            hstCard.appendChild(small);
-          });
-        }        
-      } catch (error) {
-        let msg;
-
-        if (error.name === 'AbortError') { 
-          //hmModalTxt.innerText = 'Failed to load remote node information';
-          msg = `Failed to get remote node information - ${hostName}`;           
-        } else {          
-          // hmModalTxt.innerText = error; 
-          msg = `Error: ${error.message} - ${hostName}`;
+        if (refreshRes.ok) { 
+          const data = await refreshRes.json();
+          sessionStorage.setItem("bw_actk", data.bw_actk); 
+          
+          response = await fetch(`http://${ipAddr}:${port}/node`, {
+            headers: {
+              'Access-Control-Allow-Origin': '*',
+              'accept': 'application/json',
+              'X-Request-ID': sessionStorage.getItem('id'),
+              'Authorization': `Bearer ${sessionStorage.getItem('bw_actk')}`
+            },
+            credentials: "include"
+          }); 
         }
-        
-        //hmModal.style.display = 'block';
-        document.dispatchEvent(notifEventIndex(msg));
+      }
+      
+      if (response.status !== 200) { 
+        let msg = `Failed to get remote node information - ${hostName}`;
+        document.dispatchEvent(notifEventIndex(msg));          
+      }
+
+      const dt = await response.json();
+
+      // create node card dynamicaly
+      const data = Object.entries(dt);
+      if (data.length > 0) {
+        data.forEach((value, idx) => {
+          let smallExists = document.getElementById("small"+hostName+String(idx));
+          if (smallExists) { return; }
+
+          let hstCard = document.getElementById("external-"+hostName);
+          let small = document.createElement('small');
+          small.id = "small"+hostName+String(idx);
+          small.innerHTML = `<br> ${value[0].toUpperCase()} ${value[1]}`;
+          hstCard.appendChild(small);
+        });
       }
     }
 
     async function loadTables() {
       console.log(`[info]: loadTables`);
 
-      const controller = new AbortController();
-      const id = setTimeout(() => controller.abort(), timeout);
+      const bodyData = { options: "-j", action: "all" };
+      let response = await fetch(`/list`, {
+        method: 'POST',         
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json',
+          'X-Request-ID': sessionStorage.getItem('id'),
+          'Authorization': `Bearer ${sessionStorage.getItem('bw_actk')}`
+        },
+        body: JSON.stringify(bodyData),
+        credentials: "include"
+      });
 
-      try {       
-        const bodyData = { options: "-j", action: "all" };
-        let response = await fetch(`/list`, {
-          method: 'POST',         
-          headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Content-Type': 'application/json',
-            'X-Request-ID': sessionStorage.getItem('id'),
-            'Authorization': `Bearer ${sessionStorage.getItem('bw_actk')}`
-          },
-          body: JSON.stringify(bodyData),
-          credentials: "include", 
-          signal: controller.signal
-        });
-
-        clearTimeout(id);
-
-        if (response.status === 401) { 
-          const refreshRes = await fetch(`http://${ipaddr}:${port}/refresh`, { 
-            method: "POST",
-            body: JSON.stringify({ bw_rftk: sessionStorage.getItem('bw_rftk') }),
-            credentials: "include" 
-          }); 
+      if (response.status === 401) { 
+        const refreshRes = await fetch(`http://${ipaddr}:${port}/refresh`, { 
+          method: "POST",
+          body: JSON.stringify({ bw_rftk: sessionStorage.getItem('bw_rftk') }),
+          credentials: "include" 
+        }); 
           
-          if (refreshRes.ok) { 
-            const data = await refreshRes.json();
-            sessionStorage.setItem("bw_actk", data.bw_actk); 
+        if (refreshRes.ok) { 
+          const data = await refreshRes.json();
+          sessionStorage.setItem("bw_actk", data.bw_actk); 
             
-            response = await fetch(`/list`, {
-              method: 'POST',
-              headers: {
-                'access-control-allow-origin': '*',
-                'Content-Type': 'application/json',
-                'X-Request-ID': sessionStorage.getItem('id'),
-                'Authorization': `Bearer ${sessionStorage.getItem('bw_actk')}`
-              },
-              body: JSON.stringify(bodyData),
-              credentials: "include"
-            }); 
-          }
-        }            
+          response = await fetch(`/list`, {
+            method: 'POST',
+            headers: {
+              'access-control-allow-origin': '*',
+              'Content-Type': 'application/json',
+              'X-Request-ID': sessionStorage.getItem('id'),
+              'Authorization': `Bearer ${sessionStorage.getItem('bw_actk')}`
+            },
+            body: JSON.stringify(bodyData),
+            credentials: "include"
+          }); 
+        }
+      }            
 
-        if (!response.ok) { throw new Error("error to load table data"); }
-        const data = await response.json();
-        const trData = JSON.parse(data.msg);
-        
-        // create table body dynamically
-        let result = '';
-        trData.forEach((tr, idx) => {
-          if (tr.State === "Up") {
-            result += `<tr class='tbl-home-list-jails-up'>`;
-          } else {
-            result += `<tr class='tbl-home-list-jails-down'>`;
-          }
-
-          result += `            
-            <td data-label="JID" class="tbl-hidden-td-data">${tr.JID}</td>
-            <td data-label="BOOT" class="tbl-hidden-td-data">${tr.Boot}</td>
-            <td data-label="PRIO" class="tbl-hidden-td-data">${tr.Prio}</td>
-            <td data-label="STATE">${tr.State}</td>
-            <td data-label="IP Address">${tr['IP Address']}</td>
-            <td data-label="Published Ports" class="tbl-hidden-td-data">${tr["Published Ports"]}</td>
-            <td data-label="HOSTNAME">${tr.Hostname}</td>
-            <td data-label="RELEASE" class="tbl-hidden-td-data">${tr.Release}</td>
-            <td data-label="PATH" class="tbl-hidden-td-data">${tr.Path}</td>
-          `;
-          
-          if (tr.State === "Up") {
-            result += `
-              <td data-label="ACTION" class="tbl-home-td-btns">
-                <small>
-                  <button 
-                    id="startJailBtn${idx}"
-                    class="secondary btn-home-start-jail" 
-                    data-tooltip="Start Jail"
-                    onclick="startJail('${tr.Hostname}', '${idx}')" 
-                    disabled
-                  >
-                    START
-                  </button>
-                </small>
-                &nbsp;
-                <small>
-                  <button
-                    id="stopJailBtn${idx}" 
-                    class="primary btn-home-stop-jail"
-                    data-tooltip="Stop Jail"
-                    onclick="stopJail('${tr.Hostname}', '${idx}')"                       
-                  >
-                    STOP
-                  </button>
-                </small>
-              </td>
-            `;
-          } else {
-            result += `
-              <td data-label="ACTION" class="tbl-home-td-btns">
-                <small>
-                  <button 
-                    id="startJailBtn${idx}"
-                    class="secondary btn-home-start-jail" 
-                    data-tooltip="Start Jail"
-                    onclick="startJail('${tr.Hostname}', '${idx}')"                       
-                  >
-                    START
-                  </button>
-                </small>
-                &nbsp;
-                <small>
-                  <button 
-                    id="stopJailBtn${idx}"
-                    class="primary btn-home-stop-jail"
-                    data-tooltip="Stop Jail"
-                    onclick="stopJail('${tr.Hostname}', '${idx}')" 
-                    disabled
-                  >
-                    STOP
-                  </button>
-                </small>
-              </td>
-            `;
-          }
-
-          result += `              
-              <td>
-                <button id="tbl-btn-menu" class="outline contrast" onclick="openCmdsModal('${tr.Hostname}')">☰</button>
-              </td>  
-            </tr>
-          `;
-        });
-        
-        let tableBody = document.querySelector("#jailsTable tbody");
-        tableBody.innerHTML = result;
-      } catch (error) {
-        let msg;
-        if (error.name === 'AbortError') { msg = `Failed to load jails table data - ${hostName}`;           
-        } else { msg = `Error: ${error.message} - ${hostName}`; }
+      if (!response.ok) { 
+        const msg = `Failed to load jails table data`;
         document.dispatchEvent(notifEventIndex(msg));
       }
+      
+      const data = await response.json();
+      const trData = JSON.parse(data.msg);
+        
+      // create table body dynamically
+      let result = '';
+      trData.forEach((tr, idx) => {
+        if (tr.State === "Up") {
+          result += `<tr class='tbl-home-list-jails-up'>`;
+        } else {
+          result += `<tr class='tbl-home-list-jails-down'>`;
+        }
+
+        result += `            
+          <td data-label="JID" class="tbl-hidden-td-data">${tr.JID}</td>
+          <td data-label="BOOT" class="tbl-hidden-td-data">${tr.Boot}</td>
+          <td data-label="PRIO" class="tbl-hidden-td-data">${tr.Prio}</td>
+          <td data-label="STATE">${tr.State}</td>
+          <td data-label="IP Address">${tr['IP Address']}</td>
+          <td data-label="Published Ports" class="tbl-hidden-td-data">${tr["Published Ports"]}</td>
+          <td data-label="HOSTNAME">${tr.Hostname}</td>
+          <td data-label="RELEASE" class="tbl-hidden-td-data">${tr.Release}</td>
+          <td data-label="PATH" class="tbl-hidden-td-data">${tr.Path}</td>
+        `;
+          
+        if (tr.State === "Up") {
+          result += `
+            <td data-label="ACTION" class="tbl-home-td-btns">
+              <small>
+                <button 
+                  id="startJailBtn${idx}"
+                  class="secondary btn-home-start-jail" 
+                  data-tooltip="Start Jail"
+                  onclick="startJail('${tr.Hostname}', '${idx}')" 
+                  disabled
+                >
+                  START
+                </button>
+              </small>
+              &nbsp;
+              <small>
+                <button
+                  id="stopJailBtn${idx}" 
+                  class="primary btn-home-stop-jail"
+                  data-tooltip="Stop Jail"
+                  onclick="stopJail('${tr.Hostname}', '${idx}')"                       
+                >
+                  STOP
+                </button>
+              </small>
+            </td>
+          `;
+        } else {
+          result += `
+            <td data-label="ACTION" class="tbl-home-td-btns">
+              <small>
+                <button 
+                  id="startJailBtn${idx}"
+                  class="secondary btn-home-start-jail" 
+                  data-tooltip="Start Jail"
+                  onclick="startJail('${tr.Hostname}', '${idx}')"                       
+                >
+                  START
+                </button>
+              </small>
+              &nbsp;
+              <small>
+                <button 
+                  id="stopJailBtn${idx}"
+                  class="primary btn-home-stop-jail"
+                  data-tooltip="Stop Jail"
+                  onclick="stopJail('${tr.Hostname}', '${idx}')" 
+                  disabled
+                >
+                  STOP
+                </button>
+              </small>
+            </td>
+          `;
+        }
+
+        result += `              
+            <td>
+              <button id="tbl-btn-menu" class="outline contrast" onclick="openCmdsModal('${tr.Hostname}')">☰</button>
+            </td>  
+          </tr>
+        `;
+      });
+        
+      let tableBody = document.querySelector("#jailsTable tbody");
+      tableBody.innerHTML = result;
     }
 
     async function startJail(target, idx) {

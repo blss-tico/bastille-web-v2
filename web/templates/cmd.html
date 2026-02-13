@@ -59,7 +59,6 @@
     let hlp = document.getElementById("card-help");
     hlp.style.display = 'none';
 
-    // ---------------------------------------------------------------
     let hostName = document.getElementById('hostName');
     hostName.innerHTML = `[${sessionStorage.getItem('hostname')}]`;
 
@@ -78,7 +77,6 @@
       hlp.style.display === 'none' ? hlp.style.display = 'block' : hlp.style.display = 'none';
     }
 
-    // ---------------------------------------------------------------
     function backToHome(event) {
       event.preventDefault();
 
@@ -112,18 +110,15 @@
           let tc = document.getElementById(key);
           tc.style.borderColor = 'initial';
 
-          // ---------------------------------------------------------------
           let fieldError = document.getElementById(`invalid-${key}`);
           fieldError.innerHTML = "";
 
           if (value != "") {
-            // ---------------------------------------------------------------
             tc.setAttribute('aria-invalid', 'false');
             formObj[key] = value;
             return;
           }
 
-          // ---------------------------------------------------------------
           let errorString = "[Error]: TARGET or COMMAND are required fields.";          
           error.innerText = errorString;
           tc.style.borderColor = '#e72727';
@@ -139,7 +134,6 @@
 
       result.innerText = 'send -> bastille ' + name;
 
-      // ---------------------------------------------------------------
       let submitBtn = document.getElementById('submitBtn');
       submitBtn.classList.add('loading');
       submitBtn.innerHTML = '<span class="spinner"></span>';
@@ -153,7 +147,6 @@
         error.innerText = response.error;
       }
 
-      // ---------------------------------------------------------------
       submitBtn.classList.remove('loading');
       submitBtn.innerHTML = 'Submit';
     }

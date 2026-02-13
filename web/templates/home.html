@@ -86,17 +86,6 @@
         </footer>
       </article>
     </dialog>
-
-    <!-- charts -->
-    <!-- div class="card">      
-      <h4>Revenue Trend</h4>
-      <canvas id="revenueChart" height="120"></canvas>
-    </div>
-    <br>
-    <div class="card">
-      <h4>User Growth</h4>
-      <canvas id="userChart" height="120"></canvas>
-    </div -->
   {{end}}
 
   <script>
@@ -541,38 +530,5 @@
       stopJailBtn.classList.remove('loading');
       stopJailBtn.innerHTML = 'Stop';
     }
-
-    // charts logic
-    /*
-    setTimeout(() => {
-      console.log('[info]: charts loaded');
-
-      // Charts
-      new Chart(document.getElementById('revenueChart'), {
-        type: 'line',
-        data: {
-          labels: ['Jan','Feb','Mar','Apr','May','Jun'],
-          datasets: [{
-            label: 'Revenue',
-            data: [10000,12000,15000,17000,16000,18000],
-            borderColor: 'green',
-            fill: false
-          }]
-        }
-      });
-
-      new Chart(document.getElementById('userChart'), {
-        type: 'bar',
-        data: {
-          labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
-          datasets: [{
-            label: 'Active Users',
-            data: [1200,1350,1400,1500,1600,1700,1800],
-            backgroundColor: 'blue'
-          }]
-        }
-      });
-    }, 500);
-    */
   </script>
 {{end}}

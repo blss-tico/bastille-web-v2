@@ -1,3 +1,4 @@
+// bastille-web-v2 global interface logic
 window.onload = () => {
   console.log("[info]: index window onload");
 

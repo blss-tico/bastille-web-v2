@@ -28,7 +28,6 @@ func (ht *HandlersTemplates) login(w http.ResponseWriter, r *http.Request) {
 		Port:        config.BwPortModel,
 	}
 
-	//w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	renderTemplateUtil(w, "login.html", data)
 }
@@ -70,96 +69,22 @@ func (ht *HandlersTemplates) home(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	/*
-		type ListAllJails struct {
-			Action  string `json:"action"`
-			Options string `json:"options"`
-		}
-
-		allJails := ListAllJails{
-			Action:  "all",
-			Options: "-j",
-		}
-
-		jsonData, err := json.Marshal(allJails)
-		if err != nil {
-			log.Fatalf("Error marshalling JSON: %v", err)
-		}
-
-		url := "http://" + addrModel + ":" + portModel + "/list"
-		result, err := http.Post(
-			url,
-			"application/json",
-			bytes.NewBuffer(jsonData),
-		)
-		if err != nil {
-			log.Fatalf("Error making POST request: %v", err)
-		}
-		defer result.Body.Close()
-
-		if result.StatusCode != http.StatusOK {
-			http.Error(w, errors.New("bad status code").Error(), result.StatusCode)
-			return
-		}
-
-		/*
-			result, err := ht.bl.list("-j", "all")
-			if err != nil {
-				http.Error(w, err.Error(), 500)
-				return
-			}
-
-
-		bodyBytes, err := io.ReadAll(result.Body)
-		if err != nil {
-			log.Fatalf("Error reading response body: %v", err)
-		}
-
-		type Response struct {
-			Msg string `json:"msg"`
-		}
-
-		var resp Response
-		if err := json.Unmarshal([]byte(bodyBytes), &resp); err != nil {
-			log.Fatalf("Error unmarshaling response: %v", err)
-		}
-
-		type List struct {
-			Jid       string `json:"jid"`
-			Boot      string `json:"boot"`
-			Prio      string `json:"prio"`
-			State     string `json:"state"`
-			Ip        string `json:"ip address"`
-			Published string `json:"published ports"`
-			Hostname  string `json:"hostname"`
-			Release   string `json:"release"`
-			Path      string `json:"path"`
-		}
-
-		var list []List
-		if err := json.Unmarshal([]byte(resp.Msg), &list); err != nil {
-			log.Fatalf("Error unmarshaling JSON: %v", err)
-		}
-	*/
-
 	config.LoadNodesFile()
 
 	type HomeData struct {
 		CommandName string
 		Data        config.BastilleModel
-		//JailsData   []List
-		SysInfo SysInfo
-		Addr    string
-		Nodes   []config.NodesModel
+		SysInfo     SysInfo
+		Addr        string
+		Nodes       []config.NodesModel
 	}
 
 	data := HomeData{
 		CommandName: "home",
 		Data:        config.BastilleM,
-		//JailsData:   list,
-		SysInfo: sysinfo,
-		Addr:    config.AddrModel,
-		Nodes:   config.NodesListModel,
+		SysInfo:     sysinfo,
+		Addr:        config.AddrModel,
+		Nodes:       config.NodesListModel,
 	}
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")

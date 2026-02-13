@@ -601,11 +601,11 @@ func (hd *HandlersData) migrate(w http.ResponseWriter, r *http.Request) {
 
 // monitor
 // @Summary monitor command
-// @Description To mount storage within the container use bastille mount.
+// @Description The monitor sub-command adds, removes, lists and enables/disables monitoring for container services.
 // @Tags monitor
 // @Accept  json
 // @Produce  text/plain
-// @Param  monitor body	monitorModel  true  "monitor"
+// @Param  monitor body	monitorModel true  "monitor"
 // @Success 200 {object} string
 // @Router /monitor [post]
 func (hd *HandlersData) monitor(w http.ResponseWriter, r *http.Request) {

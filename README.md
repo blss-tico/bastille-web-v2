@@ -1,6 +1,6 @@
 # Bastille-Web (This project is under development...)
 
-> A web interface for the FreeBSD bastille jails management. 
+> A web interface for the FreeBSD Bastille Jails management. 
 
 ## 💻 Requisites
 
@@ -36,10 +36,7 @@ To use bastille-web, with default ip/port option:
 sudo ./bastille-web
 ```
 
-To use bastille-web, with user defined ip/port option:
-```
-sudo ./bastille-web 10.0.0.1:80
-```
+Ip address and port are defined in .env file.
 
 ## 📝 Licença
 

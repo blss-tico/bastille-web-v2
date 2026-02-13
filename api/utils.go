@@ -29,6 +29,7 @@ func respondErrorWithJSONUtil(w http.ResponseWriter, code int, payload string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(code)
+
 	response := map[string]string{"msg": "with errors", "err": payload}
 	json.NewEncoder(w).Encode(response)
 }

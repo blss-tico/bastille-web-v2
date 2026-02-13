@@ -1,36 +1,10 @@
+/* bastille-web-v2 global interface styles */
+
 :root {
   --pico-font-size: 80%;
   --pico-form-element-spacing-vertical: 0.6rem;
   --transition-speed: 0.25s;
 }
-
-/*
-[data-theme=light],
-:root:not([data-theme=dark]),
-:host:not([data-theme=dark]) {
-  --pico-text-selection-color: #92eba1;
-  --pico-primary: #ff5555;
-  --pico-primary-background: #ff5555;
-  --pico-primary-underline: rgba(189, 60, 19, 0.5);
-  --pico-primary-hover: #f10f0f;
-  --pico-primary-hover-background: #f10f0f;
-  --pico-primary-focus: #ac0303;
-  --pico-primary-inverse: #000;
-  --pico-border-color: #000;
-}
-
-[data-theme=dark] {
-  --pico-text-selection-color: #92eba1;
-  --pico-primary: #ff5555;
-  --pico-primary-background: #ff5555;
-  --pico-primary-underline: rgba(245, 107, 61, 0.5);
-  --pico-primary-hover: #172a38;
-  --pico-primary-hover-background: #3187c4;
-  --pico-primary-focus: rgba(245, 107, 61, 0.375);
-  --pico-primary-inverse: #fff;
-  --pico-border-color: #fff;
-}
-*/
 
 body {
   min-height: 100vh;

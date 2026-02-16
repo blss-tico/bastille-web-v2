@@ -113,11 +113,12 @@ func (hu *HandlersUser) login(w http.ResponseWriter, r *http.Request) {
 
 	http.SetCookie(w, accessCookie)
 
-	err = json.NewEncoder(w).Encode(map[string]string{
-		"bw_actk":    accessString,
-		"bw_rftk":    refreshString,
-		"request_id": config.KeyModel,
-	})
+	loginResponse := loginLogoutModel{
+		Bw_actk:    accessString,
+		Bw_rftk:    refreshString,
+		Request_id: config.KeyModel,
+	}
+	err = json.NewEncoder(w).Encode(loginResponse)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -139,10 +140,12 @@ func (hu *HandlersUser) logout(w http.ResponseWriter, r *http.Request) {
 
 	http.SetCookie(w, accessCookie)
 
-	err := json.NewEncoder(w).Encode(map[string]string{
-		"bw_actk": "",
-		"bw_rftk": "",
-	})
+	logoutResponse := loginLogoutModel{
+		Bw_actk:    "",
+		Bw_rftk:    "",
+		Request_id: "",
+	}
+	err := json.NewEncoder(w).Encode(logoutResponse)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

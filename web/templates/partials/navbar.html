@@ -94,6 +94,7 @@
       if (response.code == 200) {        
         sessionStorage.setItem('bw_actk', response.data.bw_actk);
         sessionStorage.setItem('bw_rftk', response.data.bw_rftk);
+        sessionStorage.setItem('id', response.data.request_id);
       } 
       
       sessionStorage.removeItem('hostname');

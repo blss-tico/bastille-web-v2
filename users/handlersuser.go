@@ -73,7 +73,7 @@ func (hu *HandlersUser) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	expirationTime := time.Now().Add(1 * time.Minute)
+	expirationTime := time.Now().Add(15 * time.Minute)
 	claims := &claimsModel{
 		Username: creds.Username,
 		StandardClaims: jwt.StandardClaims{
@@ -114,8 +114,9 @@ func (hu *HandlersUser) login(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, accessCookie)
 
 	err = json.NewEncoder(w).Encode(map[string]string{
-		"bw_actk": accessString,
-		"bw_rftk": refreshString,
+		"bw_actk":    accessString,
+		"bw_rftk":    refreshString,
+		"request_id": config.KeyModel,
 	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -168,7 +169,7 @@ func (hu *HandlersUser) refreshTkApi(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	expirationTime := time.Now().Add(1 * time.Minute)
+	expirationTime := time.Now().Add(15 * time.Minute)
 	claims.ExpiresAt = expirationTime.Unix()
 	newToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	accessString, _ := newToken.SignedString(config.JwtKeyModel)
@@ -226,107 +227,3 @@ func (hu *HandlersUser) deleteUser(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusNoContent)
 }
-
-/*
-import (
-    "gorm.io/driver/sqlite"
-    "gorm.io/gorm"
-)
-
-var db *gorm.DB
-
-type User struct {
-    ID       uint   `gorm:"primaryKey"`
-    Username string `gorm:"unique"`
-    Password string
-}
-
-type RefreshToken struct {
-    ID        uint   `gorm:"primaryKey"`
-    Token     string `gorm:"unique"`
-    Username  string
-    ExpiresAt int64
-}
-
-func initDB() {
-    var err error
-    db, err = gorm.Open(sqlite.Open("app.db"), &gorm.Config{})
-    if err != nil {
-        panic("failed to connect database")
-    }
-    db.AutoMigrate(&User{}, &RefreshToken{})
-}
-
-func Login(w http.ResponseWriter, r *http.Request) {
-    var creds User
-    _ = json.NewDecoder(r.Body).Decode(&creds)
-
-    var storedUser User
-    if err := db.Where("username = ?", creds.Username).First(&storedUser).Error; err != nil {
-        w.WriteHeader(http.StatusUnauthorized)
-        return
-    }
-
-    if !checkPasswordHash(creds.Password, storedUser.Password) {
-        w.WriteHeader(http.StatusUnauthorized)
-        return
-    }
-
-    expirationTime := time.Now().Add(15 * time.Minute)
-    claims := &Claims{Username: creds.Username, StandardClaims: jwt.StandardClaims{ExpiresAt: expirationTime.Unix()}}
-    token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-    tokenString, _ := token.SignedString(jwtKey)
-
-    refreshExpiration := time.Now().Add(24 * time.Hour)
-    refreshClaims := &Claims{Username: creds.Username, StandardClaims: jwt.StandardClaims{ExpiresAt: refreshExpiration.Unix()}}
-    refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
-    refreshString, _ := refreshToken.SignedString(refreshKey)
-
-    // Store refresh token in DB
-    db.Create(&RefreshToken{Token: refreshString, Username: creds.Username, ExpiresAt: refreshExpiration.Unix()})
-
-    json.NewEncoder(w).Encode(map[string]string{
-        "access_token":  tokenString,
-        "refresh_token": refreshString,
-    })
-}
-
-func Refresh(w http.ResponseWriter, r *http.Request) {
-    var req map[string]string
-    _ = json.NewDecoder(r.Body).Decode(&req)
-    refreshToken := req["refresh_token"]
-
-    var stored RefreshToken
-    if err := db.Where("token = ?", refreshToken).First(&stored).Error; err != nil {
-        w.WriteHeader(http.StatusUnauthorized)
-        return
-    }
-
-    claims := &Claims{}
-    tkn, err := jwt.ParseWithClaims(refreshToken, claims, func(token *jwt.Token) (interface{}, error) {
-        return refreshKey, nil
-    })
-
-    if err != nil || !tkn.Valid || stored.ExpiresAt < time.Now().Unix() {
-        w.WriteHeader(http.StatusUnauthorized)
-        return
-    }
-
-    expirationTime := time.Now().Add(15 * time.Minute)
-    claims.ExpiresAt = expirationTime.Unix()
-    newToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-    tokenString, _ := newToken.SignedString(jwtKey)
-
-    json.NewEncoder(w).Encode(map[string]string{"access_token": tokenString})
-}
-
-func Logout(w http.ResponseWriter, r *http.Request) {
-    var req map[string]string
-    _ = json.NewDecoder(r.Body).Decode(&req)
-    refreshToken := req["refresh_token"]
-
-    db.Where("token = ?", refreshToken).Delete(&RefreshToken{})
-    w.WriteHeader(http.StatusNoContent)
-}
-
-*/

@@ -4,9 +4,11 @@
     <div class="cards">
       <div 
         class="card" 
-        id="{{.SysInfo.Hostname}}" 
+        id="{{.SysInfo.Hostname}}"
+        data-tooltip="click to reload node jails table" 
+        data-placement="bottom"
         onclick="nodeSelection('{{.SysInfo.Ip}}', '{{.SysInfo.Port}}', '{{.SysInfo.Hostname}}')"
-      >
+      >        
         <h4>[ {{ .SysInfo.Hostname}} ]</h4>
         <strong>{{ .SysInfo.Ip}}:{{ .SysInfo.Port}}</strong><br>
         <small class="secondary">HOSTNAME {{ .SysInfo.Hostname}}</small><br>
@@ -14,18 +16,20 @@
         <small class="secondary">PLATFORM {{ .SysInfo.Platform}}</small><br>
         <small class="secondary">OS RELEASE  {{ .SysInfo.Osrelease}}</small><br>        
         <small class="secondary">TOTAL MEMORY {{ .SysInfo.Totalmemory}} (Gb)</small><br>
-        <small class="secondary">BASTILLE VERSION {{ .SysInfo.BastilleVersion}}</small><br>
+        <small class="secondary">BASTILLE VERSION {{ .SysInfo.BastilleVersion}}</small><br>       
       </div>
 
       {{range .Nodes}}        
         <div 
-          class="card" 
-          id="external-{{.Nodename}}" 
+          class="card nodes-external" 
+          id="external-{{.Nodename}}"
+          data-tooltip="click to open bastille-web node"
+          data-placement="bottom" 
           onclick="nodeExternal('{{.Nodeip}}', '{{.Nodeport}}', '{{.Nodename}}')"          
         >
           <h4>[ {{ .Nodename}} ]</h4>            
           <strong>{{ .Nodeip}}:{{.Nodeport}}</strong>
-        </div>        
+        </div>
       {{end}}
     </div>
 
@@ -112,19 +116,6 @@
     (function init () {
       console.log("[info]: init");
 
-      const nodes = "{{.Nodes}}";
-      const items = nodes.replace(/[\[\]{}]/g, "").trim().split(/\s{2,}|\s(?=srv)/); 
-      const servers = items.filter(Boolean).map(str => { 
-        const [name, ip, port] = str.trim().split(/\s+/); 
-        return { name, ip, port: Number(port) }; 
-      });
-      
-      if (servers.length > 0) {
-        servers.forEach(async s => {
-          await loadNodeInfo(s.ip, s.port, s.name);
-        });
-      }
-
       sessionStorage.removeItem("ipaddr");
       sessionStorage.setItem("ipaddr", "{{.SysInfo.Ip}}");
       sessionStorage.removeItem("port");
@@ -136,7 +127,27 @@
       port = sessionStorage.getItem('port');
       hostName = sessionStorage.getItem('hostname');
 
-      nodeSelection(ipaddr, port, hostName);
+      setTimeout(async () => {
+        const nodes = "{{.Nodes}}";
+        const items = nodes.replace(/[\[\]{}]/g, "").trim().split(/\s{2,}|\s(?=srv)/); 
+        const servers = items.filter(Boolean).map(str => {
+          console.log(str);
+          const [name, ip, port] = str.trim().split(/\s+/); 
+          return { name, ip, port: Number(port) }; 
+        });
+                
+        if (servers.length > 0) {
+          servers.forEach(async s => {
+            await loadNodeInfo(s.ip, s.port, s.name);
+          });
+        }
+
+        nodeSelection(ipaddr, port, hostName);
+        document.dispatchEvent(notifEventIndex("Node selected"));
+
+        await loadTables();
+        document.dispatchEvent(notifEventIndex("Jails loaded"));
+      }, 1000);
     })();
     
     function redirectUrl() {
@@ -160,6 +171,7 @@
     function openCmdsModal(hostName) {
       const hostJail = document.getElementById('homeCmdsJail');
       hostJail.innerText = `[ ${hostName} ]`;
+      sessionStorage.setItem('hostJail', hostName);
       hmCmdsModal.style.display = 'block';
     }
 
@@ -171,17 +183,8 @@
       window.open(`http://${ipAddr}:${port}/`);
     }
 
-    async function nodeSelection(ipAddr, port, hostName) {
+    function nodeSelection(ipAddr, port, hostName) {
       console.log(`[info]: nodeSelection ${ipAddr}:${port} - ${hostName}`);
-
-      setNode(ipAddr, port, hostName);
-
-      await loadTables();
-      document.dispatchEvent(notifEventIndex("Jails loaded"));
-    }
-
-    function setNode(ipAddr, port, hostName) {
-      console.log(`[info]: setNode ${ipAddr}:${port} - ${hostName}`);
 
       sessionStorage.removeItem("ipaddr");
       sessionStorage.setItem("ipaddr", ipAddr);
@@ -192,7 +195,17 @@
 
       let nHst = document.getElementById(hostName);
       nHst.style.borderColor = "#01aaff";
-      console.log("[info]: node selected ", sessionStorage.getItem('hostname'))
+      console.log("[info]: node selected ", hostName);
+    }
+
+    async function checkApiHealth() {    
+      const response = await fetch('/health');
+      if (!response.ok) { 
+        document.dispatchEvent(notifEventIndex(`Error ${response.status} - api not responding`)); 
+        return;
+      }
+    
+      document.dispatchEvent(notifEventIndex(`Info ${response.status} - api ok`));  
     }
 
     async function loadNodeInfo(ipAddr, port, hostName) {
@@ -205,12 +218,11 @@
           'accept': 'application/json',
           'X-Request-ID': sessionStorage.getItem('id'),
           'Authorization': `Bearer ${sessionStorage.getItem('bw_actk')}`
-        },
-        credentials: "include"
+        }
       });
 
       if (response.status === 401) { 
-        const refreshRes = await fetch(`http://${ipaddr}:${port}/refresh`, { 
+        const refreshRes = await fetch(`/refresh`, { 
           method: "POST",
           body: JSON.stringify({ bw_rftk: sessionStorage.getItem('bw_rftk') }),
           credentials: "include" 
@@ -226,15 +238,15 @@
               'accept': 'application/json',
               'X-Request-ID': sessionStorage.getItem('id'),
               'Authorization': `Bearer ${sessionStorage.getItem('bw_actk')}`
-            },
-            credentials: "include"
+            }
           }); 
         }
       }
       
-      if (response.status !== 200) { 
-        let msg = `Failed to get remote node information - ${hostName}`;
-        document.dispatchEvent(notifEventIndex(msg));          
+      let msg = "";
+      if (!response.ok || response.status !== 200) { 
+        msg = `Failed to get remote node information - ${hostName}`;
+        document.dispatchEvent(notifEventIndex(msg));
       }
 
       const dt = await response.json();
@@ -253,56 +265,24 @@
           hstCard.appendChild(small);
         });
       }
+
+      msg = "Nodes loaded";
+      document.dispatchEvent(notifEventIndex(msg));
     }
 
     async function loadTables() {
       console.log(`[info]: loadTables`);
 
-      const bodyData = { options: "-j", action: "all" };
-      let response = await fetch(`/list`, {
-        method: 'POST',         
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Content-Type': 'application/json',
-          'X-Request-ID': sessionStorage.getItem('id'),
-          'Authorization': `Bearer ${sessionStorage.getItem('bw_actk')}`
-        },
-        body: JSON.stringify(bodyData),
-        credentials: "include"
-      });
-
-      if (response.status === 401) { 
-        const refreshRes = await fetch(`http://${ipaddr}:${port}/refresh`, { 
-          method: "POST",
-          body: JSON.stringify({ bw_rftk: sessionStorage.getItem('bw_rftk') }),
-          credentials: "include" 
-        }); 
-          
-        if (refreshRes.ok) { 
-          const data = await refreshRes.json();
-          sessionStorage.setItem("bw_actk", data.bw_actk); 
-            
-          response = await fetch(`/list`, {
-            method: 'POST',
-            headers: {
-              'access-control-allow-origin': '*',
-              'Content-Type': 'application/json',
-              'X-Request-ID': sessionStorage.getItem('id'),
-              'Authorization': `Bearer ${sessionStorage.getItem('bw_actk')}`
-            },
-            body: JSON.stringify(bodyData),
-            credentials: "include"
-          }); 
-        }
-      }            
-
-      if (!response.ok) { 
+      let trData;
+      const bodyData = JSON.stringify({ options: "-j", action: "all" });
+      const response = await sendHttpRequest("list", bodyData);
+      if (response.code == 200) {
+        sessionStorage.setItem('jails', response.data.msg);
+        trData = JSON.parse(response.data.msg);
+      } else {
         const msg = `Failed to load jails table data`;
         document.dispatchEvent(notifEventIndex(msg));
       }
-      
-      const data = await response.json();
-      const trData = JSON.parse(data.msg);
         
       // create table body dynamically
       let result = '';
@@ -383,7 +363,15 @@
 
         result += `              
             <td>
-              <button id="tbl-btn-menu" class="outline contrast" onclick="openCmdsModal('${tr.Hostname}')">☰</button>
+              <button 
+                id="tbl-btn-menu" 
+                class="outline contrast" 
+                data-tooltip="commands menu" 
+                data-placement="up"
+                onclick="openCmdsModal('${tr.Hostname}')"
+              >
+                ☰
+              </button>
             </td>  
           </tr>
         `;
@@ -398,63 +386,17 @@
 
       disableButtons();
     
-      const bodyData = { options: "", target: target, value: "" };
       let startJailBtn = document.getElementById(`startJailBtn${idx}`);
       startJailBtn.classList.add('loading');
       startJailBtn.innerHTML = '<span class="spinner"></span>';
-
-      try {
-        let response = await fetch(`/start`, {
-          method: 'POST',          
-          headers: {
-            'Access-Control-Allow-Origin': '*',
-            'accept': 'application/json',
-            'Content-Type': 'application/json',
-            'X-Request-ID': sessionStorage.getItem('id'),
-            'Authorization': `Bearer ${sessionStorage.getItem('bw_actk')}`
-          },
-          body: JSON.stringify(bodyData),
-          credentials: "include"
-        });
-
-        if (response.status === 401) { 
-          const refreshRes = await fetch(`/refresh`, { 
-            method: "POST",
-            body: JSON.stringify({ bw_rftk: sessionStorage.getItem('bw_rftk') }),
-            credentials: "include" 
-          }); 
-          
-          if (refreshRes.ok) { 
-            const data = await refreshRes.json();
-            sessionStorage.setItem("bw_actk", data.bw_actk); 
-            
-            response = await fetch(`/start`, {
-              method: 'POST',
-              headers: {
-                'access-control-allow-origin': '*',
-                'accept': 'application/json',
-                'Content-Type': 'application/json',
-                'X-Request-ID': sessionStorage.getItem('id'),
-                'Authorization': `Bearer ${sessionStorage.getItem('bw_actk')}`
-              },
-              body: JSON.stringify(bodyData),
-              credentials: "include"
-            }); 
-          }
-        }
-
-        if (!response.ok) {        
-          const error = await response.text();
-          throw new Error(error);
-        }
-        
-        enableButtons();
-        //redirectUrl();
+      
+      const bodyData = JSON.stringify({ options: "", target: target, value: "" });
+      const response = await sendHttpRequest("start", bodyData);
+      if (response.code == 200) {
+        enableButtons();        
         await loadTables();
-      } catch (error) {
-        let msg;
-        if (error.name === 'AbortError') { msg = `Failed to start jail - ${target}`; } 
-        else { msg = `Error: ${error.message} - ${target}`; }
+      } else {
+        const msg = `Failed to start jail ${target}`;
         document.dispatchEvent(notifEventIndex(msg));
       }
 
@@ -466,64 +408,18 @@
       console.log("[info]: stopJail ", target);
 
       disableButtons();
-      
-      const bodyData = { options: "", target: target };
+            
       let stopJailBtn = document.getElementById(`stopJailBtn${idx}`);
       stopJailBtn.classList.add('loading');
       stopJailBtn.innerHTML = '<span class="spinner"></span>';
 
-      try {
-        let response = await fetch(`/stop`, {
-          method: 'POST',
-          headers: {
-            'access-control-allow-origin': '*',
-            'accept': 'application/json',
-            'Content-Type': 'application/json',
-            'X-Request-ID': sessionStorage.getItem('id'),
-            'Authorization': `Bearer ${sessionStorage.getItem('bw_actk')}`
-          },
-          body: JSON.stringify(bodyData),
-          credentials: "include"
-        });
-        
-        if (response.status === 401) { 
-          const refreshRes = await fetch(`/refresh`, { 
-            method: "POST",
-            body: JSON.stringify({ bw_rftk: sessionStorage.getItem('bw_rftk') }),
-            credentials: "include" 
-          }); 
-          
-          if (refreshRes.ok) { 
-            const data = await refreshRes.json();
-            sessionStorage.setItem("bw_actk", data.bw_actk); 
-            
-            response = await fetch(`/stop`, {
-              method: 'POST',
-              headers: {
-                'access-control-allow-origin': '*',
-                'accept': 'application/json',
-                'Content-Type': 'application/json',
-                'X-Request-ID': sessionStorage.getItem('id'),
-                'Authorization': `Bearer ${sessionStorage.getItem('bw_actk')}`
-              },
-              body: JSON.stringify(bodyData),
-              credentials: "include"
-            }); 
-          }
-        }
-        
-        if (!response.ok) {
-          const error = await response.text();
-          throw new Error(error);
-        }
-
-        enableButtons();
-        //redirectUrl();
+      const bodyData = JSON.stringify({ options: "", target: target });
+      const response = await sendHttpRequest("stop", bodyData);
+      if (response.code == 200) {
+        enableButtons();        
         await loadTables();
-      } catch (error) {
-        let msg;
-        if (error.name === 'AbortError') {  msg = `Failed to stop jail - ${target}`; } 
-        else { msg = `Error: ${error.message} - ${target}`; }
+      } else {
+        const msg = `Failed to stop jail ${target}`;
         document.dispatchEvent(notifEventIndex(msg));
       }
 

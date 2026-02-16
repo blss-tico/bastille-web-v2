@@ -65,8 +65,15 @@
     let tgt = document.getElementById('TARGET');
     let jails = sessionStorage.getItem('jails');
     let pjails = JSON.parse(jails);
+    
+    let option = document.createElement("option");
+    option.value = sessionStorage.getItem('hostJail');
+    option.textContent = sessionStorage.getItem('hostJail');
+    tgt.appendChild(option);
+    
     pjails.forEach(j => {
-      const option = document.createElement("option");
+      if (j.Hostname === sessionStorage.getItem('hostJail')) { return; }
+      option = document.createElement("option");
       option.value = j.Hostname;
       option.textContent = j.Hostname;
       tgt.appendChild(option);

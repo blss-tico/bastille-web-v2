@@ -8,11 +8,17 @@
         </li>
       </ul>
       <ul>
-        <li><button id="themeToggle" data-tooltip="change theme">🌙</button></li>
-        <li><button id="notifToggle" data-tooltip="notifications">🔔</button></li>
-        <li><button id="logoutBtn" data-tooltip="logout" onclick="logout()">➜]</button></li>
         <li>
-          <button id="sidebarToggle" class="sidebar-toggle" data-tooltip="menu">☰</button>
+          <button id="themeToggle" data-tooltip="change theme" data-placement="bottom">🌙</button>
+        </li>
+        <li>
+          <button id="notifToggle" data-tooltip="notifications" data-placement="bottom">🔔</button>
+        </li>
+        <li>
+          <button id="logoutBtn" data-tooltip="logout" data-placement="bottom" onclick="logout()">➜]</button>
+        </li>
+        <li>
+          <button id="sidebarToggle" class="sidebar-toggle" data-tooltip="menu" data-placement="bottom">☰</button>
         </li>
       </ul>
     </nav>
@@ -83,9 +89,22 @@
       setTimeout(() => bell.classList.toggle('blink'), 3000);
     }
 
-    function logout() {
-      sessionStorage.removeItem('bw-actk');
-      sessionStorage.removeItem('bw-rftk');
+    async function logout() {
+      const response = await sendHttpRequest("logout", JSON.stringify({}));
+      if (response.code == 200) {        
+        sessionStorage.setItem('bw_actk', response.data.bw_actk);
+        sessionStorage.setItem('bw_rftk', response.data.bw_rftk);
+      } 
+      
+      sessionStorage.removeItem('hostname');
+      sessionStorage.removeItem('id');
+      sessionStorage.removeItem('jails');
+      sessionStorage.removeItem('hostJail');
+      sessionStorage.removeItem('ipaddr');
+      sessionStorage.removeItem('port');
+      sessionStorage.removeItem('bw_actk');
+      sessionStorage.removeItem('bw_rftk');
+
       window.location.href = '/';
     }
   </script>

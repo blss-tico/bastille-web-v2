@@ -211,7 +211,7 @@
 
       if (iframe) { iframe.remove(); }
       iframe = document.createElement('iframe');
-      iframe.src = `http://${ip[0]}:${port}/`;
+      iframe.src = `http://127.0.0.1:${port}/`;
       iframe.classList.add('console-iframe');
 
       result.style.display = 'none';

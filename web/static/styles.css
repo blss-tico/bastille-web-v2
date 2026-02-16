@@ -116,6 +116,11 @@ footer {
   border-bottom: none;
 }
 
+.nodes-external {
+  position: relative;
+  z-index: -1;
+}
+
 .sidebar-backdrop {
   display: none;
 }

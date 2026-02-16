@@ -21,14 +21,16 @@ type HandlersData struct {
 // @Produce  application/json
 // @Success 200 {object} string
 // @Router /health [get]
-func (hd *HandlersData) healthHandler(w http.ResponseWriter, r *http.Request) {
+func (hd *HandlersData) health(w http.ResponseWriter, r *http.Request) {
 	log.Println("healthHandler")
 
 	type HealthResponse struct {
 		Status string `json:"status"`
 	}
 
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	response := HealthResponse{Status: "bastille-web api running"}
 	err := json.NewEncoder(w).Encode(response)
 	if err != nil {
@@ -1262,7 +1264,6 @@ func (hd *HandlersData) node(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	//w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
 	err := json.NewEncoder(w).Encode(sysinfo)
 	if err != nil {

@@ -29,7 +29,7 @@ func (r *Routes) SwaggerRoutes(mux *http.ServeMux) {
 func (r *Routes) DataRoutes(mux *http.ServeMux) {
 	log.Println("dataRoutes")
 
-	mux.HandleFunc("GET /health", loggingMiddleware(r.Hd.bootstrap))
+	mux.HandleFunc("GET /health", loggingMiddleware(r.Hd.health))
 	mux.HandleFunc("POST /bootstrap", loggingMiddleware(users.ApiAuthMiddleware(r.Hd.bootstrap)))
 	mux.HandleFunc("POST /clone", loggingMiddleware(users.ApiAuthMiddleware(r.Hd.clone)))
 	mux.HandleFunc("POST /cmd", loggingMiddleware(users.ApiAuthMiddleware(r.Hd.cmd)))
@@ -70,7 +70,7 @@ func (r *Routes) DataRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /upgrade", loggingMiddleware(users.ApiAuthMiddleware(r.Hd.upgrade)))
 	mux.HandleFunc("POST /verify", loggingMiddleware(users.ApiAuthMiddleware(r.Hd.verify)))
 	mux.HandleFunc("POST /zfs", loggingMiddleware(users.ApiAuthMiddleware(r.Hd.zfs)))
-	mux.HandleFunc("GET /node", loggingMiddleware(users.ApiAuthMiddleware(r.Hd.node)))
-	mux.HandleFunc("OPTIONS /node", loggingMiddleware(users.ApiAuthMiddleware(r.Hd.node)))
+	mux.HandleFunc("GET /node", loggingMiddleware(extApiAuthMiddleware(r.Hd.node)))
+	mux.HandleFunc("OPTIONS /node", loggingMiddleware(extApiAuthMiddleware(r.Hd.node)))
 	mux.HandleFunc("GET /listall", loggingMiddleware(users.ApiAuthMiddleware(r.Hd.listAll)))
 }

@@ -19,7 +19,7 @@
         <form id="login-form">
           <label for="email">
             User name
-            <input type="text" id="username" name="username" placeholder="username" required>
+            <input type="text" id="username" name="username" placeholder="username" required autofocus>
           </label>
           <label for="password">
             Password
@@ -113,6 +113,7 @@
       const data = await response.json();
       sessionStorage.setItem('bw_actk', data.bw_actk);
       sessionStorage.setItem('bw_rftk', data.bw_rftk);
+      sessionStorage.setItem('id', data.request_id);
 
       submitBtn.setAttribute('aria-busy', 'false');
       usernameInput.setAttribute('aria-invalid', 'false');

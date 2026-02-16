@@ -84,15 +84,27 @@
     let hostName = document.getElementById('hostName');
     hostName.innerHTML = `[${sessionStorage.getItem('hostname')}]`;
 
-    let tgt = document.getElementById('TARGET');
-    let jails = sessionStorage.getItem('jails');
-    let pjails = JSON.parse(jails);
-    pjails.forEach(j => {
-      const option = document.createElement("option");
-      option.value = j.Hostname;
-      option.textContent = j.Hostname;
+    loadJailsToSelect();
+
+    function loadJailsToSelect() {
+      let tgt = document.getElementById('TARGET');
+      tgt.options.length = 0;
+
+      let option = document.createElement("option");
+      option.value = sessionStorage.getItem('hostJail');
+      option.textContent = sessionStorage.getItem('hostJail');
       tgt.appendChild(option);
-    });
+      
+      let jails = sessionStorage.getItem('jails');
+      let pjails = JSON.parse(jails);
+      pjails.forEach(j => {
+        if (j.Hostname === sessionStorage.getItem('hostJail')) { return; }
+        option = document.createElement("option");
+        option.value = j.Hostname;
+        option.textContent = j.Hostname;
+        tgt.appendChild(option);
+      });
+    }
 
     function helpED(event) {
       event.preventDefault();     

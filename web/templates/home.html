@@ -274,13 +274,16 @@
       console.log(`[info]: loadTables`);
 
       let trData;
+      let msg = "";
       const bodyData = JSON.stringify({ options: "-j", action: "all" });
       const response = await sendHttpRequest("list", bodyData);
       if (response.code == 200) {
+        msg = "Jails table data loaded";
+        document.dispatchEvent(notifEventIndex(msg));
         sessionStorage.setItem('jails', response.data.msg);
         trData = JSON.parse(response.data.msg);
       } else {
-        const msg = `Failed to load jails table data`;
+        msg = `Failed to load jails table data`;
         document.dispatchEvent(notifEventIndex(msg));
       }
         
@@ -390,13 +393,16 @@
       startJailBtn.classList.add('loading');
       startJailBtn.innerHTML = '<span class="spinner"></span>';
       
+      let msg = "";
       const bodyData = JSON.stringify({ options: "", target: target, value: "" });
       const response = await sendHttpRequest("start", bodyData);
       if (response.code == 200) {
-        enableButtons();        
+        msg = `Jail ${target} started`; 
+        document.dispatchEvent(notifEventIndex(msg));
+        enableButtons();
         await loadTables();
       } else {
-        const msg = `Failed to start jail ${target}`;
+        msg = `Failed to start jail ${target}`;
         document.dispatchEvent(notifEventIndex(msg));
       }
 
@@ -413,13 +419,16 @@
       stopJailBtn.classList.add('loading');
       stopJailBtn.innerHTML = '<span class="spinner"></span>';
 
+      let msg = "";
       const bodyData = JSON.stringify({ options: "", target: target });
       const response = await sendHttpRequest("stop", bodyData);
       if (response.code == 200) {
+        msg = `Jail ${target} stoped`; 
+        document.dispatchEvent(notifEventIndex(msg));
         enableButtons();        
         await loadTables();
       } else {
-        const msg = `Failed to stop jail ${target}`;
+        msg = `Failed to stop jail ${target}`;
         document.dispatchEvent(notifEventIndex(msg));
       }
 

@@ -22,9 +22,11 @@ func (ht *HandlersTemplates) login(w http.ResponseWriter, r *http.Request) {
 		Port        string
 	}
 
+	host := strings.Split(r.Host, ":")
+
 	data := SysInfo{
 		CommandName: "login",
-		Ip:          config.AddrModel,
+		Ip:          host[0],
 		Port:        config.BwPortModel,
 	}
 
@@ -54,6 +56,7 @@ func (ht *HandlersTemplates) home(w http.ResponseWriter, r *http.Request) {
 	pmminf := re.FindAllString(mminf, -1)
 
 	bstv, _ := ht.Bl.BastilleVersion()
+	host := strings.Split(r.Host, ":")
 
 	var sysinfo SysInfo
 	if len(posinf) > 0 && len(pmminf) > 0 && bstv != "" {
@@ -64,7 +67,7 @@ func (ht *HandlersTemplates) home(w http.ResponseWriter, r *http.Request) {
 			Osrelease:       posinf[2],
 			Totalmemory:     pmminf[0],
 			BastilleVersion: bstv,
-			Ip:              config.AddrModel,
+			Ip:              host[0],
 			Port:            config.BwPortModel,
 		}
 	}
@@ -75,7 +78,6 @@ func (ht *HandlersTemplates) home(w http.ResponseWriter, r *http.Request) {
 		CommandName string
 		Data        config.BastilleModel
 		SysInfo     SysInfo
-		Addr        string
 		Nodes       []config.NodesModel
 	}
 
@@ -83,7 +85,6 @@ func (ht *HandlersTemplates) home(w http.ResponseWriter, r *http.Request) {
 		CommandName: "home",
 		Data:        config.BastilleM,
 		SysInfo:     sysinfo,
-		Addr:        config.AddrModel,
 		Nodes:       config.NodesListModel,
 	}
 

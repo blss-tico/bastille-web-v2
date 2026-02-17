@@ -1,8 +1,6 @@
 package config
 
 import (
-	"bastille-web-v2/docs"
-
 	"encoding/json"
 	"log"
 	"os"
@@ -17,7 +15,6 @@ func LoadConfigParams() {
 	LoadUsersFile()
 	LoadBastilleFile()
 	LoadNodesFile()
-	LoadIpNumbers()
 }
 
 func LoadEnvVarsFile() {
@@ -98,16 +95,4 @@ func LoadNodesFile() {
 	} else {
 		log.Println("nodes.json is empty or incorrect", NodesListModel)
 	}
-}
-
-func LoadIpNumbers() {
-	ip1 := GetOutboundIPUtil()
-	log.Println("ip1[external lookup]: ", ip1)
-
-	ip2 := GetLocalIPUtil()
-	log.Println("ip2[loopback ifaces]: ", ip2)
-
-	AddrModel = ip2
-	docs.SwaggerInfo.Host = AddrModel
-	log.Println("addrModel: ", AddrModel)
 }

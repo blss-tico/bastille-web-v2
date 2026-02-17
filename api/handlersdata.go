@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	"bastille-web-v2/bastille"
+
+	"github.com/go-playground/validator/v10"
 )
 
 type HandlersData struct {
@@ -59,6 +61,12 @@ func (hd *HandlersData) bootstrap(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	result, err := hd.Bl.Bootstrap(data.Options, data.ReleaseTemplate, data.UpdateArch)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -88,6 +96,12 @@ func (hd *HandlersData) clone(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	result, err := hd.Bl.Clone(data.Options, data.Target, data.Newname, data.Ip)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -116,6 +130,12 @@ func (hd *HandlersData) cmd(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
+
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	commands := strings.Split(data.Command, " ")
 	if len(commands) == 0 {
@@ -152,6 +172,12 @@ func (hd *HandlersData) config(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	result, err := hd.Bl.Config(data.Options, data.Target, data.Action, data.Property, data.Value)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -181,13 +207,32 @@ func (hd *HandlersData) console(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	result, err := hd.Bl.Console(data.Options, data.Target, data.User)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	respondOkWithJSONUtil(w, result)
+	type ConsoleResponse struct {
+		Host string `json:"host"`
+		Port string `json:"port"`
+	}
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	response := ConsoleResponse{Host: r.Host, Port: result}
+	err = json.NewEncoder(w).Encode(response)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 // convert
@@ -209,6 +254,12 @@ func (hd *HandlersData) convert(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
+
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	result, err := hd.Bl.Convert(data.Options, data.Target, data.Release)
 	if err != nil {
@@ -239,6 +290,12 @@ func (hd *HandlersData) cp(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	result, err := hd.Bl.Cp(data.Options, data.Target, data.Hostpath, data.Jailpath)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -268,11 +325,11 @@ func (hd *HandlersData) create(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	// gtwip := strings.Split(data.Gtwip, " ")
-	// ipip := strings.Split(data.Ipip, " ")
-	// value := strings.Split(data.Value, " ")
-	// vlanid := strings.Split(data.Vlanid, " ")
-	// zfsoptions := strings.Split(data.Zfsoptions, " ")
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	result, err := hd.Bl.Create(data.Options, data.Name, data.Release, data.Ip, data.Iface, data.Gtwip, data.Ipip, data.Value, data.Vlanid, data.Zfsoptions)
 	if err != nil {
@@ -303,6 +360,12 @@ func (hd *HandlersData) destroy(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	result, err := hd.Bl.Destroy(data.Options, data.JailRelease)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -332,13 +395,32 @@ func (hd *HandlersData) edit(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	result, err := hd.Bl.Edit(data.Options, data.Target, data.File)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	respondOkWithJSONUtil(w, result)
+	type EditResponse struct {
+		Host string `json:"host"`
+		Port string `json:"port"`
+	}
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	response := EditResponse{Host: r.Host, Port: result}
+	err = json.NewEncoder(w).Encode(response)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 // etcupdate
@@ -360,6 +442,12 @@ func (hd *HandlersData) etcupdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
+
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	result, err := hd.Bl.Etcupdate(data.Options, data.Bootstraptarget, data.Action, data.Release)
 	if err != nil {
@@ -389,6 +477,12 @@ func (hd *HandlersData) export(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
+
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	options := strings.Split(data.Options, " ")
 	if len(options) == 0 {
@@ -425,13 +519,32 @@ func (hd *HandlersData) htop(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	result, err := hd.Bl.Htop(data.Options, data.Target)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	respondOkWithJSONUtil(w, result)
+	type HtopResponse struct {
+		Host string `json:"host"`
+		Port string `json:"port"`
+	}
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	response := HtopResponse{Host: r.Host, Port: result}
+	err = json.NewEncoder(w).Encode(response)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 // import
@@ -453,6 +566,12 @@ func (hd *HandlersData) imporT(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
+
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	result, err := hd.Bl.ImporT(data.Options, data.File, data.Release)
 	if err != nil {
@@ -483,6 +602,12 @@ func (hd *HandlersData) jcp(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	result, err := hd.Bl.Jcp(data.Options, data.Sourcejail, data.Jailpath, data.Destjail, data.Jailpath2)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -511,6 +636,12 @@ func (hd *HandlersData) limits(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
+
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	result, err := hd.Bl.Limits(data.Options, data.Target, data.Action, data.Option, data.Value)
 	if err != nil {
@@ -545,6 +676,12 @@ func (hd *HandlersData) list(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
+
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	result, err := hd.Bl.List(data.Options, data.Action)
 	if err != nil {
@@ -592,6 +729,12 @@ func (hd *HandlersData) migrate(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	result, err := hd.Bl.Migrate(data.Options, data.Target, data.Remote)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -620,6 +763,12 @@ func (hd *HandlersData) monitor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
+
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	result, err := hd.Bl.Monitor(data.Options, data.Target, data.Action, data.Service)
 	if err != nil {
@@ -650,6 +799,12 @@ func (hd *HandlersData) mount(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	result, err := hd.Bl.Mount(data.Options, data.Target, data.Hostpath, data.Jailpath, data.Filesystemtype, data.Option, data.Dump, data.Passnumber)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -679,6 +834,12 @@ func (hd *HandlersData) network(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	result, err := hd.Bl.Network(data.Options, data.Target, data.Action, data.Iface, data.Ip, data.Vlanid)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -707,6 +868,12 @@ func (hd *HandlersData) pkg(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
+
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	arg := strings.Split(data.Arg, " ")
 	if len(arg) == 0 {
@@ -743,6 +910,12 @@ func (hd *HandlersData) rcp(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	result, err := hd.Bl.Rcp(data.Options, data.Target, data.Jailpath, data.Hostpath)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -771,6 +944,12 @@ func (hd *HandlersData) rdr(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
+
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	result, err := hd.Bl.Rdr(data.Options, data.Odestination, data.Ointerface, data.Osource, data.Otype, data.Target, data.Action, data.Hostport, data.Jailport, data.Log, data.Logopts)
 	if err != nil {
@@ -801,6 +980,12 @@ func (hd *HandlersData) rename(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	result, err := hd.Bl.Rename(data.Options, data.Target, data.Newname)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -829,6 +1014,12 @@ func (hd *HandlersData) restart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
+
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	result, err := hd.Bl.Restart(data.Options, data.Target, data.Value)
 	if err != nil {
@@ -859,6 +1050,12 @@ func (hd *HandlersData) service(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	result, err := hd.Bl.Service(data.Options, data.Target, data.Servicename, data.Args)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -887,6 +1084,12 @@ func (hd *HandlersData) setup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
+
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	result, err := hd.Bl.Setup(data.Options, data.Action)
 	if err != nil {
@@ -917,6 +1120,12 @@ func (hd *HandlersData) start(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	result, err := hd.Bl.Start(data.Options, data.Target, data.Value)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -945,6 +1154,12 @@ func (hd *HandlersData) stop(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
+
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	result, err := hd.Bl.Stop(data.Options, data.Target)
 	if err != nil {
@@ -975,6 +1190,12 @@ func (hd *HandlersData) sysrc(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	result, err := hd.Bl.Sysrc(data.Options, data.Target, data.Args)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -1003,6 +1224,12 @@ func (hd *HandlersData) tags(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
+
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	result, err := hd.Bl.Tags(data.Options, data.Target, data.Action, data.Tgs)
 	if err != nil {
@@ -1033,7 +1260,12 @@ func (hd *HandlersData) template(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	log.Println(data)
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	result, err := hd.Bl.Template(data.Options, data.Target, data.Action, data.Template)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -1063,13 +1295,32 @@ func (hd *HandlersData) top(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	result, err := hd.Bl.Top(data.Options, data.Target)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	respondOkWithJSONUtil(w, result)
+	type TopResponse struct {
+		Host string `json:"host"`
+		Port string `json:"port"`
+	}
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	response := TopResponse{Host: r.Host, Port: result}
+	err = json.NewEncoder(w).Encode(response)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 // umount
@@ -1091,6 +1342,12 @@ func (hd *HandlersData) umount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
+
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	result, err := hd.Bl.Umount(data.Options, data.Target, data.Jailpath)
 	if err != nil {
@@ -1121,6 +1378,12 @@ func (hd *HandlersData) update(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	result, err := hd.Bl.Update(data.Options, data.Target)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -1149,6 +1412,12 @@ func (hd *HandlersData) upgrade(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
+
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	result, err := hd.Bl.Upgrade(data.Options, data.Target, data.Action)
 	if err != nil {
@@ -1179,6 +1448,12 @@ func (hd *HandlersData) verify(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	result, err := hd.Bl.Verify(data.Options, data.Action)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -1208,6 +1483,12 @@ func (hd *HandlersData) zfs(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	validate := validator.New()
+	if err := validate.Struct(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	result, err := hd.Bl.Zfs(data.Options, data.Target, data.Action, data.Tag, data.Key, data.Value, data.Pooldataset, data.Jailpath)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -1229,7 +1510,9 @@ func (hd *HandlersData) node(w http.ResponseWriter, r *http.Request) {
 	log.Println("nodeHandler")
 
 	if r.Method == "OPTIONS" {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.WriteHeader(http.StatusOK)
+		w.Write([]byte{})
 		return
 	}
 

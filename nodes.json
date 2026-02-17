@@ -1,7 +1,7 @@
 [
   {
-    "nodename": "example01",
-    "nodeip": "10.0.0.1",
+    "nodename": "desktop01",
+    "nodeip": "192.168.18.40",
     "nodeport": "8007"
   }
 ]

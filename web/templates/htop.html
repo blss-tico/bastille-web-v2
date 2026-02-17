@@ -198,13 +198,16 @@
 
       const response = await sendHttpRequest(name, formJson);
       if (response.code == 200) {
+        const host = response.data.host.split(":")[0];
+        const port = response.data.port;
+        if (!host || !port) {
+          error.innerText = "Error to open htop connection";
+          return;
+        }
+
         error.innerText = "";
-        result.innerText = "console opening on :" + response.data.msg;
-  
-        setTimeout(() => {
-          result.innerText = "";
-          createIframe(response.data.msg); 
-        }, 1000);
+        result.innerText = "Htop connection to: " + host + ":" + port;
+        setTimeout(() => { createIframe(host, port); }, 1000);
       } else {
         result.innerText = "";
         error.innerText = response.error;
@@ -214,16 +217,11 @@
       submitBtn.innerHTML = 'Submit';
     }
 
-    function createIframe(port) {
-      const ip = sessionStorage.getItem('ipaddr').split(":");
-      if (!ip) {
-        error.innerText = "ip address for console not found";
-        return;
-      }
-
+    function createIframe(host, port) {
       if (iframe) { iframe.remove(); }
+
       iframe = document.createElement('iframe');
-      iframe.src = `http://${ip[0]}:${port}/`;
+      iframe.src = `http://${host}:${port}/`;
       iframe.classList.add('console-iframe');
 
       result.style.display = 'none';

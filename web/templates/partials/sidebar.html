@@ -12,10 +12,8 @@
       <details>
         <summary role="button" class="outline">COMMANDS</summary>
         <ul>
-          {{range .Data.Commands}}
-            {{if and (ne .Command "edit")}}
-              <li role="button" class="outline"><a href="/{{.Command}}">{{.Command}}</a></li>            
-            {{end}}
+          {{range .Data.Commands}}            
+            <li role="button" class="outline"><a href="/{{.Command}}">{{.Command}}</a></li>
           {{end}}
         </ul>
       </details>

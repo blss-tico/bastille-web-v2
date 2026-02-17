@@ -23,6 +23,7 @@ header.navbar {
   padding-left: 0.6rem;
   border-bottom: 1px solid var(--pico-muted-border-color);
   backdrop-filter: blur(2px);
+  z-index: 99;
 }
 
 .app {
@@ -118,7 +119,7 @@ footer {
 
 .nodes-external {
   position: relative;
-  z-index: -1;
+  /*z-index: 1;*/
 }
 
 .sidebar-backdrop {

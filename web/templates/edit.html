@@ -25,7 +25,7 @@
             {{end}}
           </fieldset>
           <div class="grid">
-            <button id="submitBtn" class="secondary btn-card-submit" onclick="consoleSubmit(event)">Submit</button>
+            <button id="submitBtn" class="secondary btn-card-submit" onclick="editSubmit(event)">Submit</button>
             <button class="primary btn-card-help" onclick="helpED(event)">Help</button>
             <button class="outline contrast" onclick="backToHome(event)">Home</button>
           </div>
@@ -70,8 +70,8 @@
   </div>
 
   <script>
-    console.log('[info]: console page');
-    
+    console.log('[info]: edit page');
+
     let iframe;
 
     let hlp = document.getElementById('card-help');
@@ -118,12 +118,12 @@
       event.preventDefault();     
       hlp.style.display === 'none' ?  hlp.style.display = 'block' : hlp.style.display = 'none';
     }
-    
+
     function closeModal() {
       dlg.style.display = 'none';
       window.location.reload();
     }
-
+    
     function backToHome(event) {
       event.preventDefault();
 
@@ -132,7 +132,7 @@
       window.location.href = `http://${ipaddr}:${port}/home`;
     }
 
-    async function consoleSubmit(event) {
+    async function editSubmit(event) {
       event.preventDefault();
 
       const name = '{{$.CommandName}}';
@@ -140,10 +140,10 @@
       const error = document.getElementById('error');
       result.innerText = "";
       error.innerText = ""; 
-      
+
       const form = document.getElementById(name + '-form');
-      const formData = new FormData(form);
-      let options = [];      
+      const formData = new FormData(form);      
+      let options = [];
       let formObj = {};
       formData.forEach((value, key) => {
         if (key.indexOf('options_') != -1) {
@@ -157,8 +157,8 @@
           let t = document.getElementById(key);
           t.style.borderColor = 'initial';
 
-          let fieldError = document.getElementById(`invalid-${key}`);
-          fieldError.innerHTML = "";
+          let tfieldError = document.getElementById(`invalid-${key}`);
+          tfieldError.innerHTML = "";
 
           if (value != "") {
             t.setAttribute('aria-invalid', 'false');
@@ -170,15 +170,14 @@
           error.innerText = errorString;
           t.style.borderColor = '#e72727';
           t.setAttribute('aria-invalid', 'true');
-          fieldError.innerHTML = errorString;
+          tfieldError.innerHTML = errorString;
         }
 
-        if (key === "USER") {
-          let u = document.getElementById(key);
-          u.style.borderColor = 'initial';
+        if (key === "FILE") {
+          let f = document.getElementById(key);
+          f.style.borderColor = 'initial';
 
           if (value != "") {
-            u.setAttribute('aria-invalid', 'false');
             formObj[key] = value;
             return;
           }
@@ -191,7 +190,6 @@
       const formJson = JSON.stringify(formObj);
 
       result.innerText = 'send -> bastille ' + name;
-
       let submitBtn = document.getElementById('submitBtn');
       submitBtn.classList.add('loading');
       submitBtn.innerHTML = '<span class="spinner"></span>';
@@ -201,12 +199,12 @@
         const host = response.data.host.split(":")[0];
         const port = response.data.port;
         if (!host || !port) {
-          error.innerText = "Error to open console connection";
+          error.innerText = "Error to open edit connection";
           return;
         }
 
         error.innerText = "";
-        result.innerText = "Console connection to: " + host + ":" + port;
+        result.innerText = "Edit connection to: " + host + ":" + port;
         setTimeout(() => { createIframe(host, port); }, 1000);
       } else {
         result.innerText = "";

@@ -83,10 +83,17 @@
       option.value = sessionStorage.getItem('hostJail');
       option.textContent = sessionStorage.getItem('hostJail');
       tgt.appendChild(option);
+
+      option = document.createElement("option");
+      option.value = "bootstrap";
+      option.textContent = "bootstrap";
+      tgt.appendChild(option);
       
+
       let jails = sessionStorage.getItem('jails');
       let pjails = JSON.parse(jails);
       pjails.forEach(j => {
+        if (j.Hostname === "bootstrap") { return; }
         if (j.Hostname === sessionStorage.getItem('hostJail')) { return; }
         option = document.createElement("option");
         option.value = j.Hostname;

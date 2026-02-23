@@ -274,3 +274,8 @@ type zfsModel struct {
 	Pooldataset string `json:"pool/dataset,omitempty" example:"pool/dataset" format:"string"`
 	Jailpath    string `json:"/jail/path,omitempty" example:"/jail/path" format:"string"`
 }
+
+type nodeExtModel struct {
+	Ip   string `json:"ip"`
+	Port string `json:"port"`
+}

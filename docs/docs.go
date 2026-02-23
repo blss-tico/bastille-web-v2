@@ -40,7 +40,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.bootstrapModel"
+                            "$ref": "#/definitions/api.bootstrapModel"
                         }
                     }
                 ],
@@ -74,7 +74,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.cloneModel"
+                            "$ref": "#/definitions/api.cloneModel"
                         }
                     }
                 ],
@@ -108,7 +108,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.cmdModel"
+                            "$ref": "#/definitions/api.cmdModel"
                         }
                     }
                 ],
@@ -142,7 +142,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.configModel"
+                            "$ref": "#/definitions/api.configModel"
                         }
                     }
                 ],
@@ -176,7 +176,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.consoleModel"
+                            "$ref": "#/definitions/api.consoleModel"
                         }
                     }
                 ],
@@ -210,7 +210,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.convertModel"
+                            "$ref": "#/definitions/api.convertModel"
                         }
                     }
                 ],
@@ -244,7 +244,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.cpModel"
+                            "$ref": "#/definitions/api.cpModel"
                         }
                     }
                 ],
@@ -260,7 +260,7 @@ const docTemplate = `{
         },
         "/create": {
             "post": {
-                "description": "Create a jail uning any available bootstrapped release. To create a jail, simply provide a name, bootstrapped release, and IP address.",
+                "description": "Create a jail uning any availaBle bootstrapped release. To create a jail, simply provide a name, bootstrapped release, and IP address.",
                 "consumes": [
                     "application/json"
                 ],
@@ -278,7 +278,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.createModel"
+                            "$ref": "#/definitions/api.createModel"
                         }
                     }
                 ],
@@ -312,7 +312,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.destroyModel"
+                            "$ref": "#/definitions/api.destroyModel"
                         }
                     }
                 ],
@@ -346,7 +346,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.editModel"
+                            "$ref": "#/definitions/api.editModel"
                         }
                     }
                 ],
@@ -380,7 +380,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.etcupdateModel"
+                            "$ref": "#/definitions/api.etcupdateModel"
                         }
                     }
                 ],
@@ -414,10 +414,30 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.exportModel"
+                            "$ref": "#/definitions/api.exportModel"
                         }
                     }
                 ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/health": {
+            "get": {
+                "description": "Route to check if bastille-web api is running.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "health api check",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -448,7 +468,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.htopModel"
+                            "$ref": "#/definitions/api.htopModel"
                         }
                     }
                 ],
@@ -482,7 +502,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.importModel"
+                            "$ref": "#/definitions/api.importModel"
                         }
                     }
                 ],
@@ -516,7 +536,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.jcpModel"
+                            "$ref": "#/definitions/api.jcpModel"
                         }
                     }
                 ],
@@ -550,7 +570,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.limitsModel"
+                            "$ref": "#/definitions/api.limitsModel"
                         }
                     }
                 ],
@@ -584,7 +604,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.listModel"
+                            "$ref": "#/definitions/api.listModel"
                         }
                     }
                 ],
@@ -618,7 +638,41 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.migrateModel"
+                            "$ref": "#/definitions/api.migrateModel"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/monitor": {
+            "post": {
+                "description": "The monitor sub-command adds, removes, lists and enables/disables monitoring for container services.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "monitor"
+                ],
+                "summary": "monitor command",
+                "parameters": [
+                    {
+                        "description": "monitor",
+                        "name": "monitor",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.monitorModel"
                         }
                     }
                 ],
@@ -652,7 +706,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.mountModel"
+                            "$ref": "#/definitions/api.mountModel"
                         }
                     }
                 ],
@@ -686,7 +740,64 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.networkModel"
+                            "$ref": "#/definitions/api.networkModel"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/node": {
+            "get": {
+                "description": "Get information about bastille-web host node.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "node"
+                ],
+                "summary": "node information",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/nodeext": {
+            "post": {
+                "description": "Get information about bastille-web from external nodes.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "nodeext"
+                ],
+                "summary": "node external information",
+                "parameters": [
+                    {
+                        "description": "nodeext",
+                        "name": "nodeext",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.nodeExtModel"
                         }
                     }
                 ],
@@ -720,7 +831,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.pkgModel"
+                            "$ref": "#/definitions/api.pkgModel"
                         }
                     }
                 ],
@@ -754,7 +865,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.rcpModel"
+                            "$ref": "#/definitions/api.rcpModel"
                         }
                     }
                 ],
@@ -788,7 +899,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.rdrModel"
+                            "$ref": "#/definitions/api.rdrModel"
                         }
                     }
                 ],
@@ -822,7 +933,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.renameModel"
+                            "$ref": "#/definitions/api.renameModel"
                         }
                     }
                 ],
@@ -856,7 +967,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.restartModel"
+                            "$ref": "#/definitions/api.restartModel"
                         }
                     }
                 ],
@@ -890,7 +1001,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.serviceModel"
+                            "$ref": "#/definitions/api.serviceModel"
                         }
                     }
                 ],
@@ -924,7 +1035,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.setupModel"
+                            "$ref": "#/definitions/api.setupModel"
                         }
                     }
                 ],
@@ -958,7 +1069,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.startModel"
+                            "$ref": "#/definitions/api.startModel"
                         }
                     }
                 ],
@@ -992,7 +1103,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.stopModel"
+                            "$ref": "#/definitions/api.stopModel"
                         }
                     }
                 ],
@@ -1026,7 +1137,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.sysrcModel"
+                            "$ref": "#/definitions/api.sysrcModel"
                         }
                     }
                 ],
@@ -1060,7 +1171,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.tagsModel"
+                            "$ref": "#/definitions/api.tagsModel"
                         }
                     }
                 ],
@@ -1094,7 +1205,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.templateModel"
+                            "$ref": "#/definitions/api.templateModel"
                         }
                     }
                 ],
@@ -1128,7 +1239,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.topModel"
+                            "$ref": "#/definitions/api.topModel"
                         }
                     }
                 ],
@@ -1162,7 +1273,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.umountModel"
+                            "$ref": "#/definitions/api.umountModel"
                         }
                     }
                 ],
@@ -1196,7 +1307,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.updateModel"
+                            "$ref": "#/definitions/api.updateModel"
                         }
                     }
                 ],
@@ -1230,7 +1341,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.upgradeModel"
+                            "$ref": "#/definitions/api.upgradeModel"
                         }
                     }
                 ],
@@ -1264,7 +1375,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.verifyModel"
+                            "$ref": "#/definitions/api.verifyModel"
                         }
                     }
                 ],
@@ -1298,7 +1409,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.zfsModel"
+                            "$ref": "#/definitions/api.zfsModel"
                         }
                     }
                 ],
@@ -1314,8 +1425,11 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "main.bootstrapModel": {
+        "api.bootstrapModel": {
             "type": "object",
+            "required": [
+                "release|template"
+            ],
             "properties": {
                 "options": {
                     "type": "string",
@@ -1334,8 +1448,12 @@ const docTemplate = `{
                 }
             }
         },
-        "main.cloneModel": {
+        "api.cloneModel": {
             "type": "object",
+            "required": [
+                "new_name",
+                "target"
+            ],
             "properties": {
                 "ip": {
                     "type": "string",
@@ -1359,8 +1477,12 @@ const docTemplate = `{
                 }
             }
         },
-        "main.cmdModel": {
+        "api.cmdModel": {
             "type": "object",
+            "required": [
+                "command",
+                "target"
+            ],
             "properties": {
                 "command": {
                     "type": "string",
@@ -1379,8 +1501,13 @@ const docTemplate = `{
                 }
             }
         },
-        "main.configModel": {
+        "api.configModel": {
             "type": "object",
+            "required": [
+                "action",
+                "property",
+                "target"
+            ],
             "properties": {
                 "action": {
                     "type": "string",
@@ -1409,8 +1536,11 @@ const docTemplate = `{
                 }
             }
         },
-        "main.consoleModel": {
+        "api.consoleModel": {
             "type": "object",
+            "required": [
+                "target"
+            ],
             "properties": {
                 "options": {
                     "type": "string",
@@ -1429,8 +1559,11 @@ const docTemplate = `{
                 }
             }
         },
-        "main.convertModel": {
+        "api.convertModel": {
             "type": "object",
+            "required": [
+                "target"
+            ],
             "properties": {
                 "options": {
                     "type": "string",
@@ -1449,15 +1582,18 @@ const docTemplate = `{
                 }
             }
         },
-        "main.cpModel": {
+        "api.cpModel": {
             "type": "object",
+            "required": [
+                "target"
+            ],
             "properties": {
-                "hostpath": {
+                "host_path": {
                     "type": "string",
                     "format": "string",
                     "example": "/host/path"
                 },
-                "jailpath": {
+                "jail_path": {
                     "type": "string",
                     "format": "string",
                     "example": "/jail/path"
@@ -1474,8 +1610,12 @@ const docTemplate = `{
                 }
             }
         },
-        "main.createModel": {
+        "api.createModel": {
             "type": "object",
+            "required": [
+                "name",
+                "release"
+            ],
             "properties": {
                 "gtwip": {
                     "type": "string",
@@ -1529,8 +1669,11 @@ const docTemplate = `{
                 }
             }
         },
-        "main.destroyModel": {
+        "api.destroyModel": {
             "type": "object",
+            "required": [
+                "jail|release"
+            ],
             "properties": {
                 "jail|release": {
                     "type": "string",
@@ -1544,8 +1687,11 @@ const docTemplate = `{
                 }
             }
         },
-        "main.editModel": {
+        "api.editModel": {
             "type": "object",
+            "required": [
+                "target"
+            ],
             "properties": {
                 "file": {
                     "type": "string",
@@ -1564,8 +1710,11 @@ const docTemplate = `{
                 }
             }
         },
-        "main.etcupdateModel": {
+        "api.etcupdateModel": {
             "type": "object",
+            "required": [
+                "bootstrap|target"
+            ],
             "properties": {
                 "action": {
                     "type": "string",
@@ -1589,8 +1738,11 @@ const docTemplate = `{
                 }
             }
         },
-        "main.exportModel": {
+        "api.exportModel": {
             "type": "object",
+            "required": [
+                "target"
+            ],
             "properties": {
                 "options": {
                     "type": "string",
@@ -1609,8 +1761,11 @@ const docTemplate = `{
                 }
             }
         },
-        "main.htopModel": {
+        "api.htopModel": {
             "type": "object",
+            "required": [
+                "target"
+            ],
             "properties": {
                 "options": {
                     "type": "string",
@@ -1624,7 +1779,7 @@ const docTemplate = `{
                 }
             }
         },
-        "main.importModel": {
+        "api.importModel": {
             "type": "object",
             "properties": {
                 "file": {
@@ -1644,8 +1799,12 @@ const docTemplate = `{
                 }
             }
         },
-        "main.jcpModel": {
+        "api.jcpModel": {
             "type": "object",
+            "required": [
+                "dest_jail",
+                "source_jail"
+            ],
             "properties": {
                 "dest_jail": {
                     "type": "string",
@@ -1674,8 +1833,12 @@ const docTemplate = `{
                 }
             }
         },
-        "main.limitsModel": {
+        "api.limitsModel": {
             "type": "object",
+            "required": [
+                "action",
+                "target"
+            ],
             "properties": {
                 "action": {
                     "type": "string",
@@ -1704,8 +1867,11 @@ const docTemplate = `{
                 }
             }
         },
-        "main.listModel": {
+        "api.listModel": {
             "type": "object",
+            "required": [
+                "action"
+            ],
             "properties": {
                 "action": {
                     "type": "string",
@@ -1719,8 +1885,12 @@ const docTemplate = `{
                 }
             }
         },
-        "main.migrateModel": {
+        "api.migrateModel": {
             "type": "object",
+            "required": [
+                "remote",
+                "target"
+            ],
             "properties": {
                 "options": {
                     "type": "string",
@@ -1739,8 +1909,44 @@ const docTemplate = `{
                 }
             }
         },
-        "main.mountModel": {
+        "api.monitorModel": {
             "type": "object",
+            "required": [
+                "action",
+                "target"
+            ],
+            "properties": {
+                "action": {
+                    "type": "string",
+                    "format": "string",
+                    "example": "enable|disable|status|add|delete|list"
+                },
+                "options": {
+                    "type": "string",
+                    "format": "string",
+                    "example": "-x"
+                },
+                "service": {
+                    "type": "string",
+                    "format": "string",
+                    "example": "nginx"
+                },
+                "target": {
+                    "type": "string",
+                    "format": "string",
+                    "example": "jail_target"
+                }
+            }
+        },
+        "api.mountModel": {
+            "type": "object",
+            "required": [
+                "dump",
+                "filesystem_type",
+                "option",
+                "pass_number",
+                "target"
+            ],
             "properties": {
                 "dump": {
                     "type": "string",
@@ -1784,8 +1990,12 @@ const docTemplate = `{
                 }
             }
         },
-        "main.networkModel": {
+        "api.networkModel": {
             "type": "object",
+            "required": [
+                "action",
+                "target"
+            ],
             "properties": {
                 "action": {
                     "type": "string",
@@ -1819,8 +2029,23 @@ const docTemplate = `{
                 }
             }
         },
-        "main.pkgModel": {
+        "api.nodeExtModel": {
             "type": "object",
+            "properties": {
+                "ip": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.pkgModel": {
+            "type": "object",
+            "required": [
+                "args",
+                "target"
+            ],
             "properties": {
                 "args": {
                     "type": "string",
@@ -1839,8 +2064,11 @@ const docTemplate = `{
                 }
             }
         },
-        "main.rcpModel": {
+        "api.rcpModel": {
             "type": "object",
+            "required": [
+                "target"
+            ],
             "properties": {
                 "host_path": {
                     "type": "string",
@@ -1864,8 +2092,12 @@ const docTemplate = `{
                 }
             }
         },
-        "main.rdrModel": {
+        "api.rdrModel": {
             "type": "object",
+            "required": [
+                "action",
+                "target"
+            ],
             "properties": {
                 "action": {
                     "type": "string",
@@ -1924,8 +2156,12 @@ const docTemplate = `{
                 }
             }
         },
-        "main.renameModel": {
+        "api.renameModel": {
             "type": "object",
+            "required": [
+                "new_name",
+                "target"
+            ],
             "properties": {
                 "new_name": {
                     "type": "string",
@@ -1944,8 +2180,11 @@ const docTemplate = `{
                 }
             }
         },
-        "main.restartModel": {
+        "api.restartModel": {
             "type": "object",
+            "required": [
+                "target"
+            ],
             "properties": {
                 "options": {
                     "type": "string",
@@ -1964,8 +2203,13 @@ const docTemplate = `{
                 }
             }
         },
-        "main.serviceModel": {
+        "api.serviceModel": {
             "type": "object",
+            "required": [
+                "args",
+                "service_name",
+                "target"
+            ],
             "properties": {
                 "args": {
                     "type": "string",
@@ -1989,8 +2233,11 @@ const docTemplate = `{
                 }
             }
         },
-        "main.setupModel": {
+        "api.setupModel": {
             "type": "object",
+            "required": [
+                "action"
+            ],
             "properties": {
                 "action": {
                     "type": "string",
@@ -2004,8 +2251,11 @@ const docTemplate = `{
                 }
             }
         },
-        "main.startModel": {
+        "api.startModel": {
             "type": "object",
+            "required": [
+                "target"
+            ],
             "properties": {
                 "options": {
                     "type": "string",
@@ -2024,8 +2274,11 @@ const docTemplate = `{
                 }
             }
         },
-        "main.stopModel": {
+        "api.stopModel": {
             "type": "object",
+            "required": [
+                "target"
+            ],
             "properties": {
                 "options": {
                     "type": "string",
@@ -2039,8 +2292,12 @@ const docTemplate = `{
                 }
             }
         },
-        "main.sysrcModel": {
+        "api.sysrcModel": {
             "type": "object",
+            "required": [
+                "args",
+                "target"
+            ],
             "properties": {
                 "args": {
                     "type": "string",
@@ -2059,8 +2316,12 @@ const docTemplate = `{
                 }
             }
         },
-        "main.tagsModel": {
+        "api.tagsModel": {
             "type": "object",
+            "required": [
+                "action",
+                "target"
+            ],
             "properties": {
                 "action": {
                     "type": "string",
@@ -2084,8 +2345,12 @@ const docTemplate = `{
                 }
             }
         },
-        "main.templateModel": {
+        "api.templateModel": {
             "type": "object",
+            "required": [
+                "target",
+                "template"
+            ],
             "properties": {
                 "action": {
                     "type": "string",
@@ -2109,8 +2374,11 @@ const docTemplate = `{
                 }
             }
         },
-        "main.topModel": {
+        "api.topModel": {
             "type": "object",
+            "required": [
+                "target"
+            ],
             "properties": {
                 "options": {
                     "type": "string",
@@ -2124,8 +2392,12 @@ const docTemplate = `{
                 }
             }
         },
-        "main.umountModel": {
+        "api.umountModel": {
             "type": "object",
+            "required": [
+                "jail_path",
+                "target"
+            ],
             "properties": {
                 "jail_path": {
                     "type": "string",
@@ -2144,8 +2416,11 @@ const docTemplate = `{
                 }
             }
         },
-        "main.updateModel": {
+        "api.updateModel": {
             "type": "object",
+            "required": [
+                "target"
+            ],
             "properties": {
                 "options": {
                     "type": "string",
@@ -2159,8 +2434,12 @@ const docTemplate = `{
                 }
             }
         },
-        "main.upgradeModel": {
+        "api.upgradeModel": {
             "type": "object",
+            "required": [
+                "NEW_RELEASE|install",
+                "target"
+            ],
             "properties": {
                 "NEW_RELEASE|install": {
                     "type": "string",
@@ -2179,8 +2458,11 @@ const docTemplate = `{
                 }
             }
         },
-        "main.verifyModel": {
+        "api.verifyModel": {
             "type": "object",
+            "required": [
+                "RELEASE|TEMPLATE"
+            ],
             "properties": {
                 "RELEASE|TEMPLATE": {
                     "type": "string",
@@ -2194,8 +2476,12 @@ const docTemplate = `{
                 }
             }
         },
-        "main.zfsModel": {
+        "api.zfsModel": {
             "type": "object",
+            "required": [
+                "action",
+                "target"
+            ],
             "properties": {
                 "/jail/path": {
                     "type": "string",
@@ -2249,11 +2535,11 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "Bastille-Web",
-	Description:      "API interface to FreeBSD bastille\nObservation: Do not use console, htop and top commands with API. Only for UI Interface.",
+	Description:      "API interface to FreeBSD Bastille Jails Manager.\nObservation: Do not use console, edit, htop and top commands with API. Only for UI Interface.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
-	//LeftDelim:        "{{",
-	//RightDelim:       "}}",
+	LeftDelim:        "{{",
+	RightDelim:       "}}",
 }
 
 func init() {

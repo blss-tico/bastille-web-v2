@@ -1,6 +1,6 @@
 basePath: /
 definitions:
-  main.bootstrapModel:
+  api.bootstrapModel:
     properties:
       options:
         example: -x
@@ -14,8 +14,10 @@ definitions:
         example: --i386
         format: string
         type: string
+    required:
+    - release|template
     type: object
-  main.cloneModel:
+  api.cloneModel:
     properties:
       ip:
         example: n.n.n.n
@@ -33,8 +35,11 @@ definitions:
         example: jail_target
         format: string
         type: string
+    required:
+    - new_name
+    - target
     type: object
-  main.cmdModel:
+  api.cmdModel:
     properties:
       command:
         example: ls -l
@@ -48,8 +53,11 @@ definitions:
         example: jail_target
         format: string
         type: string
+    required:
+    - command
+    - target
     type: object
-  main.configModel:
+  api.configModel:
     properties:
       action:
         example: get|set
@@ -71,8 +79,12 @@ definitions:
         example: depends on property
         format: string
         type: string
+    required:
+    - action
+    - property
+    - target
     type: object
-  main.consoleModel:
+  api.consoleModel:
     properties:
       options:
         example: -a|-x
@@ -86,8 +98,10 @@ definitions:
         example: root
         format: string
         type: string
+    required:
+    - target
     type: object
-  main.convertModel:
+  api.convertModel:
     properties:
       options:
         example: -a|-y|-x
@@ -101,14 +115,16 @@ definitions:
         example: jail_target
         format: string
         type: string
+    required:
+    - target
     type: object
-  main.cpModel:
+  api.cpModel:
     properties:
-      hostpath:
+      host_path:
         example: /host/path
         format: string
         type: string
-      jailpath:
+      jail_path:
         example: /jail/path
         format: string
         type: string
@@ -120,8 +136,10 @@ definitions:
         example: jail_target
         format: string
         type: string
+    required:
+    - target
     type: object
-  main.createModel:
+  api.createModel:
     properties:
       gtwip:
         example: n.n.n.n
@@ -163,8 +181,11 @@ definitions:
         example: ""
         format: string
         type: string
+    required:
+    - name
+    - release
     type: object
-  main.destroyModel:
+  api.destroyModel:
     properties:
       jail|release:
         example: jail_target or release
@@ -174,8 +195,10 @@ definitions:
         example: -a|-c|-f|-y|-x
         format: string
         type: string
+    required:
+    - jail|release
     type: object
-  main.editModel:
+  api.editModel:
     properties:
       file:
         example: file_name
@@ -189,8 +212,10 @@ definitions:
         example: jail_target
         format: string
         type: string
+    required:
+    - target
     type: object
-  main.etcupdateModel:
+  api.etcupdateModel:
     properties:
       action:
         example: diff|resolve|update
@@ -208,8 +233,10 @@ definitions:
         example: 14.3-RELEASE
         format: string
         type: string
+    required:
+    - bootstrap|target
     type: object
-  main.exportModel:
+  api.exportModel:
     properties:
       options:
         example: -a|--gz|-r|-s|--tgz|--txz|-v|--xz|-x
@@ -223,8 +250,10 @@ definitions:
         example: jail_target
         format: string
         type: string
+    required:
+    - target
     type: object
-  main.htopModel:
+  api.htopModel:
     properties:
       options:
         example: -a|-x
@@ -234,8 +263,10 @@ definitions:
         example: jail_target
         format: string
         type: string
+    required:
+    - target
     type: object
-  main.importModel:
+  api.importModel:
     properties:
       file:
         example: /path/to/archive.file
@@ -250,7 +281,7 @@ definitions:
         format: string
         type: string
     type: object
-  main.jcpModel:
+  api.jcpModel:
     properties:
       dest_jail:
         example: dest_jail
@@ -272,8 +303,11 @@ definitions:
         example: source_jail
         format: string
         type: string
+    required:
+    - dest_jail
+    - source_jail
     type: object
-  main.limitsModel:
+  api.limitsModel:
     properties:
       action:
         example: add|remove|clear|reset|list|show|active|stats
@@ -295,8 +329,11 @@ definitions:
         example: depends on Option
         format: string
         type: string
+    required:
+    - action
+    - target
     type: object
-  main.listModel:
+  api.listModel:
     properties:
       action:
         example: all|backup|export|import|ip|jail|limit|log|path|port|prio|release|state|template|type
@@ -306,8 +343,10 @@ definitions:
         example: -d|-j|-p|-u|-x
         format: string
         type: string
+    required:
+    - action
     type: object
-  main.migrateModel:
+  api.migrateModel:
     properties:
       options:
         example: -a|-b|-d|--doas|-l|-p|-x
@@ -321,8 +360,33 @@ definitions:
         example: jail_target
         format: string
         type: string
+    required:
+    - remote
+    - target
     type: object
-  main.mountModel:
+  api.monitorModel:
+    properties:
+      action:
+        example: enable|disable|status|add|delete|list
+        format: string
+        type: string
+      options:
+        example: -x
+        format: string
+        type: string
+      service:
+        example: nginx
+        format: string
+        type: string
+      target:
+        example: jail_target
+        format: string
+        type: string
+    required:
+    - action
+    - target
+    type: object
+  api.mountModel:
     properties:
       dump:
         example: "0"
@@ -356,8 +420,14 @@ definitions:
         example: jail_target
         format: string
         type: string
+    required:
+    - dump
+    - filesystem_type
+    - option
+    - pass_number
+    - target
     type: object
-  main.networkModel:
+  api.networkModel:
     properties:
       action:
         example: add|remove
@@ -383,8 +453,18 @@ definitions:
         example: vlan10
         format: string
         type: string
+    required:
+    - action
+    - target
     type: object
-  main.pkgModel:
+  api.nodeExtModel:
+    properties:
+      ip:
+        type: string
+      port:
+        type: string
+    type: object
+  api.pkgModel:
     properties:
       args:
         example: install pkg_name
@@ -398,8 +478,11 @@ definitions:
         example: jail_target
         format: string
         type: string
+    required:
+    - args
+    - target
     type: object
-  main.rcpModel:
+  api.rcpModel:
     properties:
       host_path:
         example: /host/path
@@ -417,8 +500,10 @@ definitions:
         example: jail_target
         format: string
         type: string
+    required:
+    - target
     type: object
-  main.rdrModel:
+  api.rdrModel:
     properties:
       action:
         example: clear|reset|list|tcp|udp
@@ -464,8 +549,11 @@ definitions:
         example: jail_target
         format: string
         type: string
+    required:
+    - action
+    - target
     type: object
-  main.renameModel:
+  api.renameModel:
     properties:
       new_name:
         example: new_name
@@ -479,8 +567,11 @@ definitions:
         example: jail_target
         format: string
         type: string
+    required:
+    - new_name
+    - target
     type: object
-  main.restartModel:
+  api.restartModel:
     properties:
       options:
         example: -b|-d|-v|-x
@@ -494,8 +585,10 @@ definitions:
         example: seconds to -d option
         format: string
         type: string
+    required:
+    - target
     type: object
-  main.serviceModel:
+  api.serviceModel:
     properties:
       args:
         example: start|restart|stop|enable|disable
@@ -513,8 +606,12 @@ definitions:
         example: jail_target
         format: string
         type: string
+    required:
+    - args
+    - service_name
+    - target
     type: object
-  main.setupModel:
+  api.setupModel:
     properties:
       action:
         example: bridge|loopback|pf|firewall|shared|vnet|storage
@@ -524,8 +621,10 @@ definitions:
         example: -y|-x
         format: string
         type: string
+    required:
+    - action
     type: object
-  main.startModel:
+  api.startModel:
     properties:
       options:
         example: -b|-d|-v|-x
@@ -539,8 +638,10 @@ definitions:
         example: seconds to -d option
         format: string
         type: string
+    required:
+    - target
     type: object
-  main.stopModel:
+  api.stopModel:
     properties:
       options:
         example: -v|-x
@@ -550,8 +651,10 @@ definitions:
         example: jail_target
         format: string
         type: string
+    required:
+    - target
     type: object
-  main.sysrcModel:
+  api.sysrcModel:
     properties:
       args:
         example: sshd_enable="YES"
@@ -565,8 +668,11 @@ definitions:
         example: jail_target
         format: string
         type: string
+    required:
+    - args
+    - target
     type: object
-  main.tagsModel:
+  api.tagsModel:
     properties:
       action:
         example: add|delete|list
@@ -584,8 +690,11 @@ definitions:
         example: jail_target
         format: string
         type: string
+    required:
+    - action
+    - target
     type: object
-  main.templateModel:
+  api.templateModel:
     properties:
       action:
         example: --convert
@@ -603,8 +712,11 @@ definitions:
         example: template/name
         format: string
         type: string
+    required:
+    - target
+    - template
     type: object
-  main.topModel:
+  api.topModel:
     properties:
       options:
         example: -a|-x
@@ -614,8 +726,10 @@ definitions:
         example: jail_target
         format: string
         type: string
+    required:
+    - target
     type: object
-  main.umountModel:
+  api.umountModel:
     properties:
       jail_path:
         example: /jail/path
@@ -629,8 +743,11 @@ definitions:
         example: jail_target
         format: string
         type: string
+    required:
+    - jail_path
+    - target
     type: object
-  main.updateModel:
+  api.updateModel:
     properties:
       options:
         example: -a|-f|-x
@@ -640,8 +757,10 @@ definitions:
         example: jail_target
         format: string
         type: string
+    required:
+    - target
     type: object
-  main.upgradeModel:
+  api.upgradeModel:
     properties:
       NEW_RELEASE|install:
         example: n.n-RELEASE|install
@@ -655,8 +774,11 @@ definitions:
         example: jail_target
         format: string
         type: string
+    required:
+    - NEW_RELEASE|install
+    - target
     type: object
-  main.verifyModel:
+  api.verifyModel:
     properties:
       RELEASE|TEMPLATE:
         example: n.n-RELEASE|template_name
@@ -666,8 +788,10 @@ definitions:
         example: -x
         format: string
         type: string
+    required:
+    - RELEASE|TEMPLATE
     type: object
-  main.zfsModel:
+  api.zfsModel:
     properties:
       /jail/path:
         example: /jail/path
@@ -701,12 +825,15 @@ definitions:
         example: value for set action
         format: string
         type: string
+    required:
+    - action
+    - target
     type: object
 info:
   contact: {}
   description: |-
-    API interface to FreeBSD bastille
-    Observation: Do not use console, htop and top commands with API. Only for UI Interface.
+    API interface to FreeBSD Bastille Jails Manager.
+    Observation: Do not use console, edit, htop and top commands with API. Only for UI Interface.
   license:
     name: BSD-3-Clause
     url: https://opensource.org/license/bsd-3-clause
@@ -728,7 +855,7 @@ paths:
         name: bootstrap
         required: true
         schema:
-          $ref: '#/definitions/main.bootstrapModel'
+          $ref: '#/definitions/api.bootstrapModel'
       produces:
       - text/plain
       responses:
@@ -750,7 +877,7 @@ paths:
         name: clone
         required: true
         schema:
-          $ref: '#/definitions/main.cloneModel'
+          $ref: '#/definitions/api.cloneModel'
       produces:
       - text/plain
       responses:
@@ -772,7 +899,7 @@ paths:
         name: cmd
         required: true
         schema:
-          $ref: '#/definitions/main.cmdModel'
+          $ref: '#/definitions/api.cmdModel'
       produces:
       - text/plain
       responses:
@@ -794,7 +921,7 @@ paths:
         name: config
         required: true
         schema:
-          $ref: '#/definitions/main.configModel'
+          $ref: '#/definitions/api.configModel'
       produces:
       - text/plain
       responses:
@@ -817,7 +944,7 @@ paths:
         name: console
         required: true
         schema:
-          $ref: '#/definitions/main.consoleModel'
+          $ref: '#/definitions/api.consoleModel'
       produces:
       - text/plain
       responses:
@@ -840,7 +967,7 @@ paths:
         name: convert
         required: true
         schema:
-          $ref: '#/definitions/main.convertModel'
+          $ref: '#/definitions/api.convertModel'
       produces:
       - text/plain
       responses:
@@ -862,7 +989,7 @@ paths:
         name: cp
         required: true
         schema:
-          $ref: '#/definitions/main.cpModel'
+          $ref: '#/definitions/api.cpModel'
       produces:
       - text/plain
       responses:
@@ -877,7 +1004,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create a jail uning any available bootstrapped release. To create
+      description: Create a jail uning any availaBle bootstrapped release. To create
         a jail, simply provide a name, bootstrapped release, and IP address.
       parameters:
       - description: create
@@ -885,7 +1012,7 @@ paths:
         name: create
         required: true
         schema:
-          $ref: '#/definitions/main.createModel'
+          $ref: '#/definitions/api.createModel'
       produces:
       - text/plain
       responses:
@@ -907,7 +1034,7 @@ paths:
         name: destroy
         required: true
         schema:
-          $ref: '#/definitions/main.destroyModel'
+          $ref: '#/definitions/api.destroyModel'
       produces:
       - text/plain
       responses:
@@ -929,7 +1056,7 @@ paths:
         name: edit
         required: true
         schema:
-          $ref: '#/definitions/main.editModel'
+          $ref: '#/definitions/api.editModel'
       produces:
       - text/plain
       responses:
@@ -952,7 +1079,7 @@ paths:
         name: etcupdate
         required: true
         schema:
-          $ref: '#/definitions/main.etcupdateModel'
+          $ref: '#/definitions/api.etcupdateModel'
       produces:
       - text/plain
       responses:
@@ -976,7 +1103,7 @@ paths:
         name: export
         required: true
         schema:
-          $ref: '#/definitions/main.exportModel'
+          $ref: '#/definitions/api.exportModel'
       produces:
       - text/plain
       responses:
@@ -987,6 +1114,19 @@ paths:
       summary: export command
       tags:
       - export
+  /health:
+    get:
+      description: Route to check if bastille-web api is running.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: health api check
+      tags:
+      - health
   /htop:
     post:
       consumes:
@@ -999,7 +1139,7 @@ paths:
         name: htop
         required: true
         schema:
-          $ref: '#/definitions/main.htopModel'
+          $ref: '#/definitions/api.htopModel'
       produces:
       - text/plain
       responses:
@@ -1021,7 +1161,7 @@ paths:
         name: import
         required: true
         schema:
-          $ref: '#/definitions/main.importModel'
+          $ref: '#/definitions/api.importModel'
       produces:
       - text/plain
       responses:
@@ -1043,7 +1183,7 @@ paths:
         name: jcp
         required: true
         schema:
-          $ref: '#/definitions/main.jcpModel'
+          $ref: '#/definitions/api.jcpModel'
       produces:
       - text/plain
       responses:
@@ -1065,7 +1205,7 @@ paths:
         name: limits
         required: true
         schema:
-          $ref: '#/definitions/main.limitsModel'
+          $ref: '#/definitions/api.limitsModel'
       produces:
       - text/plain
       responses:
@@ -1088,7 +1228,7 @@ paths:
         name: list
         required: true
         schema:
-          $ref: '#/definitions/main.listModel'
+          $ref: '#/definitions/api.listModel'
       produces:
       - text/plain
       responses:
@@ -1111,7 +1251,7 @@ paths:
         name: migrate
         required: true
         schema:
-          $ref: '#/definitions/main.migrateModel'
+          $ref: '#/definitions/api.migrateModel'
       produces:
       - text/plain
       responses:
@@ -1122,6 +1262,29 @@ paths:
       summary: migrate command
       tags:
       - migrate
+  /monitor:
+    post:
+      consumes:
+      - application/json
+      description: The monitor sub-command adds, removes, lists and enables/disables
+        monitoring for container services.
+      parameters:
+      - description: monitor
+        in: body
+        name: monitor
+        required: true
+        schema:
+          $ref: '#/definitions/api.monitorModel'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: monitor command
+      tags:
+      - monitor
   /mount:
     post:
       consumes:
@@ -1133,7 +1296,7 @@ paths:
         name: mount
         required: true
         schema:
-          $ref: '#/definitions/main.mountModel'
+          $ref: '#/definitions/api.mountModel'
       produces:
       - text/plain
       responses:
@@ -1155,7 +1318,7 @@ paths:
         name: network
         required: true
         schema:
-          $ref: '#/definitions/main.networkModel'
+          $ref: '#/definitions/api.networkModel'
       produces:
       - text/plain
       responses:
@@ -1166,6 +1329,43 @@ paths:
       summary: network command
       tags:
       - network
+  /node:
+    get:
+      consumes:
+      - application/json
+      description: Get information about bastille-web host node.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: node information
+      tags:
+      - node
+  /nodeext:
+    post:
+      consumes:
+      - application/json
+      description: Get information about bastille-web from external nodes.
+      parameters:
+      - description: nodeext
+        in: body
+        name: nodeext
+        required: true
+        schema:
+          $ref: '#/definitions/api.nodeExtModel'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: node external information
+      tags:
+      - nodeext
   /pkg:
     post:
       consumes:
@@ -1177,7 +1377,7 @@ paths:
         name: pkg
         required: true
         schema:
-          $ref: '#/definitions/main.pkgModel'
+          $ref: '#/definitions/api.pkgModel'
       produces:
       - text/plain
       responses:
@@ -1199,7 +1399,7 @@ paths:
         name: rcp
         required: true
         schema:
-          $ref: '#/definitions/main.rcpModel'
+          $ref: '#/definitions/api.rcpModel'
       produces:
       - text/plain
       responses:
@@ -1222,7 +1422,7 @@ paths:
         name: rdr
         required: true
         schema:
-          $ref: '#/definitions/main.rdrModel'
+          $ref: '#/definitions/api.rdrModel'
       produces:
       - text/plain
       responses:
@@ -1244,7 +1444,7 @@ paths:
         name: rename
         required: true
         schema:
-          $ref: '#/definitions/main.renameModel'
+          $ref: '#/definitions/api.renameModel'
       produces:
       - text/plain
       responses:
@@ -1266,7 +1466,7 @@ paths:
         name: restart
         required: true
         schema:
-          $ref: '#/definitions/main.restartModel'
+          $ref: '#/definitions/api.restartModel'
       produces:
       - text/plain
       responses:
@@ -1290,7 +1490,7 @@ paths:
         name: service
         required: true
         schema:
-          $ref: '#/definitions/main.serviceModel'
+          $ref: '#/definitions/api.serviceModel'
       produces:
       - text/plain
       responses:
@@ -1314,7 +1514,7 @@ paths:
         name: setup
         required: true
         schema:
-          $ref: '#/definitions/main.setupModel'
+          $ref: '#/definitions/api.setupModel'
       produces:
       - text/plain
       responses:
@@ -1336,7 +1536,7 @@ paths:
         name: start
         required: true
         schema:
-          $ref: '#/definitions/main.startModel'
+          $ref: '#/definitions/api.startModel'
       produces:
       - text/plain
       responses:
@@ -1358,7 +1558,7 @@ paths:
         name: stop
         required: true
         schema:
-          $ref: '#/definitions/main.stopModel'
+          $ref: '#/definitions/api.stopModel'
       produces:
       - text/plain
       responses:
@@ -1382,7 +1582,7 @@ paths:
         name: sysrc
         required: true
         schema:
-          $ref: '#/definitions/main.sysrcModel'
+          $ref: '#/definitions/api.sysrcModel'
       produces:
       - text/plain
       responses:
@@ -1405,7 +1605,7 @@ paths:
         name: tags
         required: true
         schema:
-          $ref: '#/definitions/main.tagsModel'
+          $ref: '#/definitions/api.tagsModel'
       produces:
       - text/plain
       responses:
@@ -1427,7 +1627,7 @@ paths:
         name: template
         required: true
         schema:
-          $ref: '#/definitions/main.templateModel'
+          $ref: '#/definitions/api.templateModel'
       produces:
       - text/plain
       responses:
@@ -1449,7 +1649,7 @@ paths:
         name: top
         required: true
         schema:
-          $ref: '#/definitions/main.topModel'
+          $ref: '#/definitions/api.topModel'
       produces:
       - text/plain
       responses:
@@ -1471,7 +1671,7 @@ paths:
         name: umount
         required: true
         schema:
-          $ref: '#/definitions/main.umountModel'
+          $ref: '#/definitions/api.umountModel'
       produces:
       - text/plain
       responses:
@@ -1495,7 +1695,7 @@ paths:
         name: update
         required: true
         schema:
-          $ref: '#/definitions/main.updateModel'
+          $ref: '#/definitions/api.updateModel'
       produces:
       - text/plain
       responses:
@@ -1519,7 +1719,7 @@ paths:
         name: upgrade
         required: true
         schema:
-          $ref: '#/definitions/main.upgradeModel'
+          $ref: '#/definitions/api.upgradeModel'
       produces:
       - text/plain
       responses:
@@ -1543,7 +1743,7 @@ paths:
         name: verify
         required: true
         schema:
-          $ref: '#/definitions/main.verifyModel'
+          $ref: '#/definitions/api.verifyModel'
       produces:
       - text/plain
       responses:
@@ -1566,7 +1766,7 @@ paths:
         name: zfs
         required: true
         schema:
-          $ref: '#/definitions/main.zfsModel'
+          $ref: '#/definitions/api.zfsModel'
       produces:
       - text/plain
       responses:

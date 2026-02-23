@@ -2,6 +2,8 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
+	"io"
 	"log"
 	"net/http"
 	"regexp"
@@ -1549,6 +1551,80 @@ func (hd *HandlersData) node(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	err := json.NewEncoder(w).Encode(sysinfo)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+// nodeExternal
+// @Summary node external information
+// @Description Get information about bastille-web from external nodes.
+// @Tags nodeext
+// @Accept json
+// @Param  nodeext  body  nodeExtModel  true  "nodeext"
+// @Produce  application/json
+// @Success 200 {object} string
+// @Router /nodeext [post]
+func (hd *HandlersData) nodeExternal(w http.ResponseWriter, r *http.Request) {
+	log.Println("nodeExternalHandler")
+
+	if r.Method == "OPTIONS" {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte{})
+		return
+	}
+
+	var nodeExt nodeExtModel
+	err := json.NewDecoder(r.Body).Decode(&nodeExt)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	url := "http://" + nodeExt.Ip + ":" + nodeExt.Port + "/node"
+	req, _ := http.NewRequest("GET", url, nil)
+	req.Header.Set("Authorization", r.Header.Get("Authorization"))
+	req.Header.Set("X-Request-ID", r.Header.Get("X-Request-ID"))
+	client := &http.Client{}
+	result, err := client.Do(req)
+	if err != nil {
+		http.Error(w, err.Error(), result.StatusCode)
+		return
+	}
+	defer result.Body.Close()
+
+	if result.StatusCode != http.StatusOK {
+		http.Error(w, errors.New("bad status code").Error(), result.StatusCode)
+		return
+	}
+
+	bodyBytes, err := io.ReadAll(result.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	type SysInfo struct {
+		Hostname        string `json:"hostname"`
+		Arch            string `json:"arch"`
+		Platform        string `json:"platform"`
+		Osrelease       string `json:"osrelease"`
+		Totalmemory     string `json:"totalmemory"`
+		BastilleVersion string `json:"bastilleversion"`
+	}
+
+	var sysinfo SysInfo
+	if err := json.Unmarshal([]byte(bodyBytes), &sysinfo); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	err = json.NewEncoder(w).Encode(sysinfo)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

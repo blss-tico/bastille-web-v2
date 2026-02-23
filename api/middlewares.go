@@ -19,7 +19,7 @@ func loggingMiddleware(f http.HandlerFunc) http.HandlerFunc {
 
 func extApiAuthMiddleware(f http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		log.Println("ApiAuthMiddleware")
+		log.Println("extApiAuthMiddleware")
 
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {

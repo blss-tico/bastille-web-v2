@@ -72,5 +72,7 @@ func (r *Routes) DataRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /zfs", loggingMiddleware(users.ApiAuthMiddleware(r.Hd.zfs)))
 	mux.HandleFunc("GET /node", loggingMiddleware(extApiAuthMiddleware(r.Hd.node)))
 	mux.HandleFunc("OPTIONS /node", loggingMiddleware(extApiAuthMiddleware(r.Hd.node)))
+	mux.HandleFunc("POST /nodeext", loggingMiddleware(extApiAuthMiddleware(r.Hd.nodeExternal)))
+	mux.HandleFunc("OPTIONS /nodeext", loggingMiddleware(extApiAuthMiddleware(r.Hd.nodeExternal)))
 	mux.HandleFunc("GET /listall", loggingMiddleware(users.ApiAuthMiddleware(r.Hd.listAll)))
 }

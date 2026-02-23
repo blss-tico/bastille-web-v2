@@ -127,8 +127,15 @@
 
       setTimeout(async () => {
         const nodes = "{{.Nodes}}";
-        const items = nodes.replace(/[\[\]{}]/g, "").trim().split(/\s{2,}|\s(?=srv)/); 
-        const servers = items.filter(Boolean).map(str => {
+        console.log("[info]: init nodes ", nodes);
+        
+        // extract external nodes to load info 
+        const regex = /\{([^}]+)\}/g; 
+        const matches = []; 
+        let match; 
+        while ((match = regex.exec(nodes)) !== null) { matches.push(match[1]); }
+        
+        servers = matches.filter(Boolean).map(str => {
           const [name, ip, port] = str.trim().split(/\s+/); 
           return { name, ip, port }; 
         });
@@ -137,9 +144,11 @@
           servers.forEach(async s => { await loadNodeInfo(s.ip, s.port, s.name); });
         }
 
+        // set node selection
         nodeSelection(ipaddr, port, hostName);
         document.dispatchEvent(notifEventIndex("Node selected"));
 
+        // load node selection table with jails
         await loadTables();
         document.dispatchEvent(notifEventIndex("Jails loaded"));
       }, 1000);

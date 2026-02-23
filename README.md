@@ -36,6 +36,8 @@ To use bastille-web, with default ip/port option:
 sudo ./bastille-web
 ```
 
+Open browser and point to machine ip to use the web interface. 
+Login user admin and default password admin. Please change default password (admin).
 Ip address and port are defined in .env file.
 
 ## 📝 Licença

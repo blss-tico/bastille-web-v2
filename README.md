@@ -11,29 +11,29 @@ Before begin, you must to know that this project was tested with:
 - Bastille 1.0.1.250714+;
 - ttyd 1.7.7+;
 
-## 🚀 Install bastille-web
+## 🚀 Install bastille-web-v2
 
-To install the bastille-web, follow these steps.
+To install the bastille-web-v2, follow these steps.
 
 Install dependencies:
 
 ```
-pkg install -y go125 bastille ttyd
+pkg install -y go bastille ttyd
 ```
 
 Clone the project and build it:
 
 ```
-git clone https://github.com/blss-tico/bastille-web.git
-cd bastille-web
+git clone https://github.com/blss-tico/bastille-web-v2.git
+cd bastille-web-v2
 go build
 ```
 
-## ☕ Usando bastille-web
+## ☕ Usando bastille-web-v2
 
-To use bastille-web, with default ip/port option:
+To use bastille-web-v2, with default ip/port option:
 ```
-sudo ./bastille-web
+sudo ./bastille-web-v2
 ```
 
 Open browser and point to machine ip to use the web interface. 

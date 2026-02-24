@@ -1,4 +1,4 @@
-# Bastille-Web (This project is under development...)
+# Bastille-Web-V2 (This project is under development...)
 
 > A web interface for the FreeBSD Bastille Jails management. 
 
